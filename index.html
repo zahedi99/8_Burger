@@ -2,158 +2,203 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="Choose your nearest branch and order online." />
-  <title>Food Brand</title>
-  <link rel="stylesheet" href="./styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Burger 8 — Landing</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
-
-  <!-- Header overlays hero (glass at top, solid on scroll) -->
-  <header class="header" id="siteHeader">
+  <!-- Header -->
+  <header id="siteHeader" class="header" role="banner">
     <div class="container header__inner">
-      <div class="topbar" id="topbar">
-        <nav class="nav" aria-label="Primary">
-          <a class="nav__link" href="#locations">Locations</a>
-          <a class="nav__link" href="#story">Our story</a>
-          <a class="nav__link" href="#contact">Contact</a>
-        </nav>
+      <a class="brand" href="#top" aria-label="Burger 8 home">
+        <img class="brand__logo" src="assets/burger_8_logo.png" alt="Burger 8 logo" />
+        <span class="brand__name">BURGER 8</span>
+      </a>
 
-        <a class="brand" href="#top" aria-label="Home">
-          <span class="brand__name">FOOD BRAND</span>
-        </a>
+      <nav class="navPill" aria-label="Primary navigation">
+        <a href="#locations">LOCATIONS</a>
+        <a href="#menu">MENU</a>
+        <a href="#story">OUR STORY</a>
+        <a href="#contact">CONTACT</a>
+      </nav>
 
-        <a class="orderPill" id="orderBtn" href="#locations" aria-disabled="true">Order</a>
+      <a id="orderBtn" class="btn btn--order" href="#locations" aria-disabled="true">Order</a>
 
-        <button class="burger" type="button"
-                aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
-          <span></span><span></span><span></span>
-        </button>
-      </div>
+      <button class="burger" type="button" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
     </div>
 
-    <div class="mobile" id="mobileMenu" hidden>
-      <a href="#locations">Locations</a>
-      <a href="#story">Our story</a>
-      <a href="#contact">Contact</a>
-      <a class="mobile__cta" id="orderBtnMobile" href="#locations" aria-disabled="true">Order</a>
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="mobileMenu" hidden>
+      <nav class="mobileMenu__nav" aria-label="Mobile navigation">
+        <a href="#locations">Locations</a>
+        <a href="#menu">Menu</a>
+        <a href="#story">Our Story</a>
+        <a href="#contact">Contact</a>
+        <a id="orderBtnMobile" class="btn btn--order" href="#locations" aria-disabled="true">Order</a>
+      </nav>
     </div>
   </header>
 
-  <main id="main">
-    <!-- FULL BLEED HERO -->
-    <section class="heroFull" id="top" aria-label="Hero">
-      <div class="heroFull__scrim" aria-hidden="true"></div>
-      <div class="heroFull__vignette" aria-hidden="true"></div>
+  <!-- Hero (image only here) -->
+  <section id="top" class="hero" aria-label="Hero">
+    <div class="hero__overlay"></div>
+    <div class="container hero__content">
+      <div class="heroCard">
+        <p class="kicker">DAILY BAKED BUNS. FRESHLY MADE. FAST SERVICE.</p>
 
-      <div class="heroFull__caption container">
-        <p class="heroFull__strap">DAILY BAKED BUNS. FRESHLY MADE. FAST SERVICE.</p>
-      </div>
-    </section>
+        <div class="heroCard__grid">
+          <div class="heroCard__left">
+            <h1>Burger 8</h1>
+            <p class="muted">Pick a branch, then order in 1–2 clicks.</p>
 
-    <!-- Branch picker below hero -->
-    <section class="section section--cream" aria-label="Branch selection">
-      <div class="container">
-        <div class="headline">
-          <h1>Pick a branch.<br/>Order in seconds.</h1>
-          <p class="sub">Select your nearest location to open online ordering.</p>
-        </div>
-
-        <div class="branchPicker">
-          <div class="branchPicker__row">
-            <label class="field">
-              <span class="field__label">Choose your branch</span>
-              <select id="branchSelect" class="select">
-                <option value="">Select a location…</option>
-              </select>
-            </label>
-
-            <button class="btn btn--primary" id="geoBtn" type="button">Use my location</button>
-          </div>
-
-          <div class="branchPicker__meta">
-            <div class="selected" id="selectedWrap" hidden>
-              <span class="selected__label">Selected:</span>
-              <span class="selected__name" id="selectedName">—</span>
-              <button class="selected__clear" id="clearBranch" type="button">Clear</button>
+            <div class="heroCard__cta">
+              <a class="btn" href="#locations">Browse locations</a>
+              <a id="orderHeroBtn" class="btn btn--order" href="#locations" aria-disabled="true">Order now</a>
             </div>
-            <p class="hint" id="geoHint" role="status"></p>
+
+            <div class="chips">
+              <span class="chip">Branch-first</span>
+              <span class="chip">Pick → Order</span>
+              <span class="chip">1–2 clicks</span>
+            </div>
           </div>
 
-          <div class="actionsRow">
-            <a class="btn btn--ghost" href="#locations">Browse locations</a>
-            <a class="btn btn--primary" id="orderHeroBtn" href="#locations" aria-disabled="true">Order now</a>
+          <div class="heroCard__right">
+            <div class="miniPanel">
+              <div class="miniPanel__title">Ordering</div>
+              <div class="miniPanel__row">
+                <span class="pill">Fast checkout</span>
+                <span class="pill">Closest branch</span>
+                <span class="pill">Directions</span>
+              </div>
+              <p class="miniPanel__hint muted">Select a branch to enable Order.</p>
+            </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main (light background after hero) -->
+  <main class="main">
+    <!-- Locations -->
+    <section id="locations" class="section">
+      <div class="container">
+        <div class="sectionHead">
+          <h2>Locations</h2>
+          <p class="muted">Select a branch to unlock ordering.</p>
+        </div>
+
+        <div class="locationsPanel">
+          <div class="locationsPanel__top">
+            <label class="srOnly" for="storeSearch">Search locations</label>
+            <input id="storeSearch" class="input" type="search" placeholder="Search locations..." />
+
+            <div class="rowRight">
+              <select id="branchSelect" class="select">
+                <option value="">— Select a branch —</option>
+              </select>
+
+              <button id="geoBtn" class="btn btn--ghost" type="button">Use my location</button>
+            </div>
+          </div>
+
+          <p id="geoHint" class="hint"></p>
+
+          <div id="selectedWrap" class="selected" hidden>
+            <div class="selected__left">
+              <strong>Selected:</strong> <span id="selectedName">—</span>
+            </div>
+            <button id="clearBranch" class="btn btn--ghost" type="button">Clear</button>
+          </div>
+
+          <div id="storeGrid" class="storeGrid"></div>
         </div>
       </div>
     </section>
 
-    <!-- LOCATIONS -->
-    <section class="section" id="locations">
+    <!-- Menu -->
+    <section id="menu" class="section">
       <div class="container">
-        <div class="section__head">
+        <div class="sectionHead sectionHead--split">
           <div>
-            <h2>Locations</h2>
-            <p>Search and choose a branch. Your “Order” button updates instantly.</p>
+            <h2>Menu</h2>
+            <p class="muted">Tap an item for ingredients and details.</p>
           </div>
-
-          <label class="search">
-            <span class="sr-only">Search locations</span>
-            <input id="storeSearch" type="search" placeholder="Search by town or postcode…" autocomplete="off" />
-          </label>
+          <div class="menuSearchWrap">
+            <label class="srOnly" for="menuSearch">Search menu</label>
+            <input id="menuSearch" class="input" type="search" placeholder="Search menu..." />
+          </div>
         </div>
 
-        <div class="storeGrid" id="storeGrid"></div>
+        <div class="menuPanel">
+          <div id="menuTabs" class="tabs" role="tablist" aria-label="Menu categories"></div>
+          <div id="menuGrid" class="menuGrid" aria-live="polite"></div>
+
+          <p id="menuStatus" class="hint"></p>
+        </div>
       </div>
     </section>
 
-    <!-- STORY -->
-    <section class="section section--muted" id="story">
-      <div class="container story">
-        <div class="story__copy">
-          <h2>Our story</h2>
-          <p>
-            Built for cravings. Designed for speed. This landing page routes customers to the correct
-            branch ordering page in one step.
-          </p>
-          <p class="muted">
-            Pick a location and order instantly — no confusion, no extra steps.
-          </p>
-          <a class="btn btn--primary" href="#locations">Choose a branch</a>
-        </div>
-
-        <div class="story__media" role="img" aria-label="Food photo"></div>
-      </div>
-    </section>
-
-    <!-- CONTACT -->
-    <section class="section" id="contact">
+    <!-- Story -->
+    <section id="story" class="section">
       <div class="container">
-        <h2>Contact</h2>
-        <p class="muted">Add phone/email/social links here when ready.</p>
+        <div class="sectionHead">
+          <h2>Our Story</h2>
+          <p class="muted">Simple, fast, and made fresh — every day.</p>
+        </div>
+
+        <div class="contentPanel">
+          <p>
+            Burger 8 focuses on quality ingredients, fresh preparation, and quick service.
+            Choose a branch and order directly from that location.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="section">
+      <div class="container">
+        <div class="sectionHead">
+          <h2>Contact</h2>
+          <p class="muted">Need help? Reach your chosen branch via their ordering site.</p>
+        </div>
+
+        <div class="contentPanel">
+          <p>
+            Pick a location above, then use “Directions” or “Order”.
+          </p>
+        </div>
+
+        <footer class="footer">
+          <span>© <span id="year"></span> Powered By BritEat</span>
+        </footer>
       </div>
     </section>
   </main>
 
-  <footer class="footer">
-    <div class="container footer__inner">
-      <div>
-        <strong>Food Brand</strong>
-        <p class="muted">Multi-branch ordering landing page.</p>
+  <!-- Menu Modal -->
+  <div id="menuModal" class="modal" aria-hidden="true">
+    <div class="modal__backdrop" data-close="1"></div>
+    <div class="modal__card" role="dialog" aria-modal="true" aria-label="Menu item details">
+      <button class="modal__close" type="button" data-close="1" aria-label="Close">×</button>
+
+      <div class="modal__meta">
+        <div class="modal__cat" id="modalCategory">Menu</div>
+        <div class="modal__price" id="modalPrice">£—</div>
       </div>
 
-      <div class="footer__links">
-        <a href="#locations">Locations</a>
-        <a href="#story">Story</a>
-        <a href="#contact">Contact</a>
-      </div>
+      <h3 class="modal__title" id="modalTitle">Item</h3>
+      <p class="modal__desc" id="modalDesc"></p>
 
-      <div class="muted">© <span id="year"></span></div>
+      <div class="modal__tags" id="modalTags"></div>
     </div>
-  </footer>
+  </div>
 
-  <script src="./script.js" defer></script>
+  <script src="script.js"></script>
 </body>
 </html>
