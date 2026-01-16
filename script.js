@@ -1,6 +1,4 @@
-/* =========================================================
-   Burger 8 — Landing Page JS (Branches + Menu via Proxy)
-   ========================================================= */
+
 
 /* ---------- Branch data ---------- */
 const BRANCHES = [
@@ -12,7 +10,7 @@ const BRANCHES = [
     lat: 54.70705484704487,
     lon: -1.2214848646442373,
     orderUrl: "https://burger8hartlepool.briteat.co.uk/",
-    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Hartlepool"
+    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Hartlepool",
   },
   {
     id: "benton",
@@ -22,7 +20,7 @@ const BRANCHES = [
     lat: 55.007947172166844,
     lon: -1.5782965020026007,
     orderUrl: "https://burger8benton.briteat.co.uk/",
-    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Benton"
+    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Benton",
   },
   {
     id: "easington",
@@ -32,7 +30,7 @@ const BRANCHES = [
     lat: 54.78825128410204,
     lon: -1.3255925253066914,
     orderUrl: "https://burger8easington.briteat.co.uk/",
-    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Easington"
+    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Easington",
   },
   {
     id: "ashington",
@@ -42,7 +40,7 @@ const BRANCHES = [
     lat: 55.183361786072375,
     lon: -1.571623667610947,
     orderUrl: "https://burger8ashington.briteat.co.uk/",
-    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Ashington"
+    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Ashington",
   },
   {
     id: "birtley",
@@ -52,7 +50,7 @@ const BRANCHES = [
     lat: 54.89415511371937,
     lon: -1.5768603081097352,
     orderUrl: "https://burger8birtley.briteat.co.uk/",
-    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Birtley"
+    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Birtley",
   },
   {
     id: "blyth",
@@ -62,7 +60,7 @@ const BRANCHES = [
     lat: 55.126359423544635,
     lon: -1.510574867614533,
     orderUrl: "https://burger8blyth.briteat.co.uk/",
-    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Blyth"
+    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Blyth",
   },
   {
     id: "bedlington",
@@ -72,26 +70,57 @@ const BRANCHES = [
     lat: 55.140780449160076,
     lon: -1.5668576467265456,
     orderUrl: "https://burger8bedlington.briteat.co.uk/",
-    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Bedlington"
-  }
+    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Bedlington",
+  },
 ];
 
 /* =========================================================
-   MENU: Pull full menu through your Cloudflare Worker
-   =========================================================
-   Your worker already supports:
-   https://burger8-menu-proxy.parsazahedi78.workers.dev/menu
-*/
-const MENU_PROXY_ENDPOINT = "https://burger8-menu-proxy.parsazahedi78.workers.dev/menu";
+   MENU: Pull menu through Cloudflare Worker (proxy)
+   ========================================================= */
+const MENU_PROXY_ENDPOINT =
+  "https://burger8-menu-proxy.parsazahedi78.workers.dev/menu";
+
+/* =========================================================
+   LOCAL MENU IMAGES (Option 2)
+   Your real folder:
+   assets/PNG-20260116T144520Z-3-001/PNG/<Category>/...
+   ========================================================= */
+const IMAGE_BASE = "assets/PNG-20260116T144520Z-3-001/PNG";
+
+/* Index-based images (numbered No.X.png) */
+const LOCAL_IMAGE_MAP = {
+  Burgers: [
+    `${IMAGE_BASE}/Burgers/No.1.png`,
+    `${IMAGE_BASE}/Burgers/No.2.png`,
+    `${IMAGE_BASE}/Burgers/No.3.png`,
+    `${IMAGE_BASE}/Burgers/No.4.png`,
+    `${IMAGE_BASE}/Burgers/No.5.png`,
+    `${IMAGE_BASE}/Burgers/No.6.png`,
+    `${IMAGE_BASE}/Burgers/No.7.png`,
+    `${IMAGE_BASE}/Burgers/No.8.png`,
+  ],
+};
+
+/* Name-based images for Loaded Fries */
+const LOADED_FRIES_IMAGES = {
+  "bbq bacon loaded fries": `${IMAGE_BASE}/Loaded Fries/BBQ Bacon Loaded Fries.png`,
+  "burger loaded fries": `${IMAGE_BASE}/Loaded Fries/Burger Loaded Fries.png`,
+  "chicken loaded fries": `${IMAGE_BASE}/Loaded Fries/Chicken Loaded Fries.png`,
+  "original loaded fries": `${IMAGE_BASE}/Loaded Fries/Original Loaded Fries.png`,
+  "spicy loaded fries": `${IMAGE_BASE}/Loaded Fries/Spicy Loaded Fries.png`,
+};
 
 /* fallback menu (only used if proxy fails) */
 let MENU = [
-  { id: "classic-cheeseburger", name: "Classic Cheeseburger", category: "Burgers", price: 9.5, description: "Smashed beef, cheddar, pickles, house sauce.", tags: ["Beef"] },
-  { id: "crispy-chicken", name: "Crispy Chicken Burger", category: "Burgers", price: 10.5, description: "Crispy chicken, lettuce, mayo, pickles.", tags: ["Chicken"] },
-  { id: "classic-wings", name: "Classic Wings", category: "Wings", price: 7.0, description: "Crispy wings — choose your flavour.", tags: ["Wings"] },
-  { id: "loaded-fries", name: "Loaded Fries", category: "Loaded Fries", price: 8.2, description: "Fries, cheese sauce, toppings.", tags: ["Loaded"] },
-  { id: "vanilla-shake", name: "Vanilla Milkshake", category: "Milkshakes", price: 6.5, description: "Creamy shake (470ml).", tags: ["Milkshake"] },
-  { id: "cola", name: "Cola", category: "Drinks", price: 2.0, description: "Chilled can/bottle.", tags: ["Cold"] }
+  {
+    id: "fallback-1",
+    name: "Classic Cheeseburger",
+    category: "Burgers",
+    price: 9.5,
+    description: "Smashed beef, cheddar, pickles, house sauce.",
+    tags: ["BEEF"],
+    image: `${IMAGE_BASE}/Burgers/No.1.png`,
+  },
 ];
 
 /* ---------- DOM ---------- */
@@ -126,13 +155,15 @@ const modalCategory = document.getElementById("modalCategory");
 const modalPrice = document.getElementById("modalPrice");
 const modalTags = document.getElementById("modalTags");
 
-document.getElementById("year").textContent = new Date().getFullYear();
+const yearEl = document.getElementById("year");
+if (yearEl) yearEl.textContent = new Date().getFullYear();
 
 /* ---------- Helpers ---------- */
 function moneyGBP(n) {
   if (typeof n !== "number" || Number.isNaN(n)) return "£—";
   return `£${n.toFixed(2)}`;
 }
+
 function stripHtml(html) {
   if (!html) return "";
   const tmp = document.createElement("div");
@@ -158,6 +189,12 @@ function setOrderEnabled(enabled, url) {
   });
 }
 
+function highlightSelected(branchId) {
+  document.querySelectorAll(".store").forEach((card) => {
+    card.classList.toggle("is-selected", card.dataset.id === branchId);
+  });
+}
+
 function setSelectedBranch(branch) {
   if (!branch) {
     selectedWrap.hidden = true;
@@ -172,12 +209,6 @@ function setSelectedBranch(branch) {
   highlightSelected(branch.id);
 }
 
-function highlightSelected(branchId) {
-  document.querySelectorAll(".store").forEach((card) => {
-    card.classList.toggle("is-selected", card.dataset.id === branchId);
-  });
-}
-
 /* Haversine distance (km) */
 function haversineKm(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -186,7 +217,9 @@ function haversineKm(lat1, lon1, lat2, lon2) {
   const dLon = toRad(lon2 - lon1);
   const a =
     Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
@@ -204,7 +237,9 @@ function findClosestBranch(userLat, userLon) {
   return { branch: best, distanceKm: bestDist };
 }
 
-/* ---------- Render: Branches ---------- */
+/* =========================================================
+   Branch rendering
+   ========================================================= */
 function renderSelectOptions() {
   BRANCHES.forEach((b) => {
     const opt = document.createElement("option");
@@ -253,23 +288,27 @@ function renderStoreGrid(list) {
   highlightSelected(branchSelect.value || null);
 }
 
-/* ---------- MENU: Convert proxy JSON → our menu model ---------- */
+/* =========================================================
+   MENU: Convert proxy JSON → our menu model
+   ========================================================= */
 function toPriceNumberFromStoreApi(p) {
-  // Woo store API often provides minor units as string: "999" with currency_minor_unit: 2
   try {
     const minorUnit = Number(p?.prices?.currency_minor_unit ?? 2);
     const raw = p?.prices?.price;
     if (raw == null) return NaN;
     const n = Number(raw);
     if (Number.isNaN(n)) return NaN;
-    return n / (10 ** minorUnit);
+    return n / 10 ** minorUnit;
   } catch {
     return NaN;
   }
 }
 
 function toCategoryFromStoreApi(p) {
-  const cat = (p?.categories && p.categories[0] && p.categories[0].name) ? p.categories[0].name : "Menu";
+  const cat =
+    p?.categories && p.categories[0] && p.categories[0].name
+      ? p.categories[0].name
+      : "Menu";
   return cat;
 }
 
@@ -277,9 +316,14 @@ function toTagsFromStoreApi(p) {
   const tags = [];
   if (p?.type) tags.push(String(p.type).toUpperCase());
   if (Array.isArray(p?.categories)) {
-    p.categories.slice(0, 2).forEach(c => c?.name && tags.push(c.name));
+    p.categories.slice(0, 2).forEach((c) => c?.name && tags.push(c.name));
   }
   return Array.from(new Set(tags)).slice(0, 4);
+}
+
+function toImageFromStoreApi(p) {
+  const src = p?.images?.[0]?.src;
+  return typeof src === "string" && src.trim().length > 0 ? src : "";
 }
 
 async function loadMenuFromProxy() {
@@ -291,31 +335,64 @@ async function loadMenuFromProxy() {
   const data = await res.json();
   if (!Array.isArray(data)) throw new Error("Menu proxy returned non-array JSON");
 
+  const categoryCounters = {}; // for index-based images
+
   const mapped = data.map((p) => {
+    const category = toCategoryFromStoreApi(p);
     const price = toPriceNumberFromStoreApi(p);
     const desc = stripHtml(p?.short_description || p?.description || "");
+    const apiImg = toImageFromStoreApi(p);
+
+    const idx = categoryCounters[category] ?? 0;
+    categoryCounters[category] = idx + 1;
+
+    const nameKey = String(p?.name || "").toLowerCase().trim();
+
+    // 1) Loaded Fries -> NAME mapping
+    let localImg = "";
+    if (category === "Loaded Fries") {
+      localImg = LOADED_FRIES_IMAGES[nameKey] || "";
+    }
+
+    // 2) Everything else -> INDEX mapping (e.g., Burgers -> No.1.png, No.2.png...)
+    if (!localImg) {
+      localImg = LOCAL_IMAGE_MAP[category]?.[idx] || "";
+    }
+
     return {
       id: String(p?.id ?? crypto.randomUUID()),
       name: String(p?.name ?? "Item"),
-      category: toCategoryFromStoreApi(p),
-      price: price,
+      category,
+      price,
       description: desc,
-      tags: toTagsFromStoreApi(p)
+      tags: toTagsFromStoreApi(p),
+
+      // priority: local -> api -> none
+      image: localImg || apiImg || "",
     };
   });
 
-  // remove empty names
-  MENU = mapped.filter(x => x.name && x.name.trim().length > 0);
-
+  MENU = mapped.filter((x) => x.name && x.name.trim().length > 0);
   menuStatus.textContent = MENU.length ? "" : "Menu is empty.";
 }
 
-/* ---------- Render: Menu ---------- */
-let activeCategory = "All";
 
+let activeCategory = "Featured";
+
+function hasImage(item) {
+  return Boolean(item.image && String(item.image).trim().length > 0);
+}
+
+function isFeaturedItem(item) {
+  const cat = String(item.category || "").toLowerCase();
+  return hasImage(item) && (cat === "burgers" || cat === "loaded fries");
+}
+
+/* ---------- Tabs list ---------- */
 function getCategories() {
   const set = new Set(MENU.map((x) => x.category));
-  return ["All", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
+  const cats = Array.from(set).sort((a, b) => a.localeCompare(b));
+  return ["Featured", "All", ...cats];
 }
 
 function renderTabs() {
@@ -332,6 +409,7 @@ function renderTabs() {
 
     btn.addEventListener("click", () => {
       activeCategory = cat;
+      if (menuSearch) menuSearch.value = ""; // optional: clear search when switching
       renderTabs();
       renderMenuGrid();
     });
@@ -342,15 +420,35 @@ function renderTabs() {
 
 function matchesSearch(item, q) {
   if (!q) return true;
-  const hay = `${item.name} ${item.description || ""} ${(item.tags || []).join(" ")} ${item.category}`.toLowerCase();
+  const hay = `${item.name} ${item.description || ""} ${(item.tags || []).join(
+    " "
+  )} ${item.category}`.toLowerCase();
   return hay.includes(q);
 }
 
 function getFilteredMenu() {
   const q = (menuSearch?.value || "").trim().toLowerCase();
+  const searching = q.length > 0;
+
   return MENU.filter((item) => {
-    const catOk = activeCategory === "All" ? true : item.category === activeCategory;
-    return catOk && matchesSearch(item, q);
+    // Category filter:
+    // - When searching, ignore category lock (user wants full menu)
+    let catOk = true;
+
+    if (!searching) {
+      if (activeCategory === "Featured") {
+        catOk = isFeaturedItem(item);
+      } else if (activeCategory === "All") {
+        catOk = true;
+      } else {
+        catOk = item.category === activeCategory;
+      }
+    }
+
+    // Search filter:
+    const searchOk = searching ? matchesSearch(item, q) : true;
+
+    return catOk && searchOk;
   });
 }
 
@@ -364,12 +462,21 @@ function menuCard(item) {
     .map((t) => `<span class="pill">${t}</span>`)
     .join("");
 
+  // REQUIRED ORDER: Name → Description → Image
+  const imgHtml = hasImage(item)
+    ? `<img class="menuItem__img" src="${item.image}" alt="${item.name}" loading="lazy" />`
+    : "";
+
   el.innerHTML = `
     <div class="menuItem__top">
       <h3 class="menuItem__name">${item.name}</h3>
       <span class="menuItem__price">${moneyGBP(item.price)}</span>
     </div>
+
     <p class="menuItem__desc">${item.description || ""}</p>
+
+    ${imgHtml}
+
     <div class="menuItem__tags">${tags}</div>
   `;
 
@@ -387,6 +494,27 @@ function menuCard(item) {
 
 function renderMenuGrid() {
   const list = getFilteredMenu();
+
+  list.sort((a, b) => {
+    const aHasImg = hasImage(a) ? 1 : 0;
+    const bHasImg = hasImage(b) ? 1 : 0;
+
+    
+    if (aHasImg !== bHasImg) return bHasImg - aHasImg;
+
+    
+    if (activeCategory === "Featured") {
+      const aCat = String(a.category || "").toLowerCase();
+      const bCat = String(b.category || "").toLowerCase();
+
+      if (aCat === "burgers" && bCat === "loaded fries") return -1;
+      if (aCat === "loaded fries" && bCat === "burgers") return 1;
+    }
+
+    // Otherwise keep original order
+    return 0;
+  });
+
   menuGrid.innerHTML = "";
   list.forEach((item) => menuGrid.appendChild(menuCard(item)));
 }
@@ -442,7 +570,6 @@ if (burgerBtn) {
   });
 }
 
-// Force-close mobile menu on desktop widths
 function syncMobileMenuForDesktop() {
   if (window.innerWidth > 720) {
     if (burgerBtn) burgerBtn.setAttribute("aria-expanded", "false");
@@ -501,52 +628,49 @@ geoBtn.addEventListener("click", () => {
 
       branchSelect.value = branch.id;
       setSelectedBranch(branch);
-      geoHint.textContent = `Closest branch: ${branch.town} (${distanceKm.toFixed(1)} km).`;
-      document.getElementById("locations").scrollIntoView({ behavior: "smooth", block: "start" });
+      geoHint.textContent = `Closest branch: ${branch.town} (${distanceKm.toFixed(
+        1
+      )} km).`;
+
+      const locSection = document.getElementById("locations");
+      if (locSection) {
+        locSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     },
     (err) => {
-      if (err.code === err.PERMISSION_DENIED) geoHint.textContent = "Location permission denied.";
+      if (err.code === err.PERMISSION_DENIED)
+        geoHint.textContent = "Location permission denied.";
       else geoHint.textContent = "Could not get your location.";
     },
     { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
   );
 });
 
-/* Menu search */
+/* Menu search:
+   
+*/
 menuSearch.addEventListener("input", () => renderMenuGrid());
 
 /* ---------- Init ---------- */
 (function init() {
   syncMobileMenuForDesktop();
 
+  // Branches
   renderSelectOptions();
   renderStoreGrid(BRANCHES);
   setSelectedBranch(null);
 
-  // Try load real menu from proxy; fallback if it fails
+  // Menu (API first, fallback if fails)
   loadMenuFromProxy()
     .then(() => {
-      // If URL hash suggests a menu category, you can auto-select later.
-      activeCategory = "All";
+      activeCategory = "Featured"; // default view
       renderTabs();
       renderMenuGrid();
-
-      // Optional: if they arrive at #menu-burgers -> pick Burgers if exists
-      const hash = (location.hash || "").toLowerCase();
-      if (hash.includes("menu")) {
-        const cats = getCategories();
-        const preferred = cats.find(c => c.toLowerCase() === "burgers");
-        if (preferred) {
-          activeCategory = preferred;
-          renderTabs();
-          renderMenuGrid();
-        }
-      }
     })
     .catch((err) => {
       console.warn("Menu load failed, using fallback MENU:", err);
       menuStatus.textContent = "Menu unavailable right now. (Fallback loaded.)";
-      activeCategory = "All";
+      activeCategory = "Featured";
       renderTabs();
       renderMenuGrid();
     });

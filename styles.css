@@ -334,14 +334,23 @@ body{
   padding: 16px;
 }
 
-/* --- MENU PANEL: make it look like the “HOT DOG” style (clean, cream, typographic) --- */
+/* --- MENU PANEL */
 .menuPanel{
   border-radius: 0;
   border: 0;
-  background: transparent;      /* remove box feel */
+  background: transparent;      
   box-shadow: none;
-  padding: 0;                   /* cleaner */
+  padding: 0;                   
 }
+.menuItem__img{
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+  border-radius: 14px;
+  margin-top: 10px;
+  object-fit: contain;
+}
+
 
 .locationsPanel__top{
   display:flex;
