@@ -81,23 +81,21 @@ const MENU_PROXY_ENDPOINT =
   "https://burger8-menu-proxy.parsazahedi78.workers.dev/menu";
 
 /* =========================================================
-   LOCAL MENU IMAGES (Option 2)
-   Your real folder:
-   assets/PNG-20260116T144520Z-3-001/PNG/<Category>/...
+   LOCAL MENU IMAGES 
    ========================================================= */
 const IMAGE_BASE = "assets/PNG-20260116T144520Z-3-001/PNG";
 
 /* Index-based images (numbered No.X.png) */
 const LOCAL_IMAGE_MAP = {
   Burgers: [
-    `${IMAGE_BASE}/Burgers/No.1.png`,
-    `${IMAGE_BASE}/Burgers/No.2.png`,
-    `${IMAGE_BASE}/Burgers/No.3.png`,
-    `${IMAGE_BASE}/Burgers/No.4.png`,
-    `${IMAGE_BASE}/Burgers/No.5.png`,
-    `${IMAGE_BASE}/Burgers/No.6.png`,
-    `${IMAGE_BASE}/Burgers/No.7.png`,
     `${IMAGE_BASE}/Burgers/No.8.png`,
+    `${IMAGE_BASE}/Burgers/No.7.png`,
+    `${IMAGE_BASE}/Burgers/No.6.png`,
+    `${IMAGE_BASE}/Burgers/No.5.png`,
+    `${IMAGE_BASE}/Burgers/No.4.png`,
+    `${IMAGE_BASE}/Burgers/No.3.png`,
+    `${IMAGE_BASE}/Burgers/No.2.png`,
+    `${IMAGE_BASE}/Burgers/No.1.png`,
   ],
 };
 
