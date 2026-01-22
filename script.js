@@ -1,6 +1,4 @@
-
-
-/* ---------- Branch data ---------- */
+/* ---------- Branch data (unchanged) ---------- */
 const BRANCHES = [
   {
     id: "hartlepool",
@@ -112,51 +110,46 @@ const LOADED_FRIES_IMAGES = {
 let MENU = [
   {
     id: "fallback-1",
-    name: "Classic Cheeseburger",
+    name: "#1 CLASSIC",
     category: "Burgers",
-    price: 9.5,
-    description: "Smashed beef, cheddar, pickles, house sauce.",
+    price: 10.6,
+    description:
+      "SERVED WITH SEASONED FRIES, 2 x SMASHED BEEF PATTIES, CHEESE, LETTUCE, RED ONION, DILL PICKLE, HOMEMADE BURGER SAUCE, TOASTED BRIOCHE BUN, LEVEL UP?, EXTRA TOPPINGS",
     tags: ["BEEF"],
     image: `${IMAGE_BASE}/Burgers/No.1.png`,
   },
 ];
 
 /* ---------- DOM ---------- */
-const header = document.getElementById("siteHeader");
-const burgerBtn = document.querySelector(".burger");
-const mobileMenu = document.getElementById("mobileMenu");
+const orderBtn = document.getElementById("orderBtn");
+const yearEl = document.getElementById("year");
 
 const branchSelect = document.getElementById("branchSelect");
 const storeGrid = document.getElementById("storeGrid");
-const storeSearch = document.getElementById("storeSearch");
-
 const geoBtn = document.getElementById("geoBtn");
 const geoHint = document.getElementById("geoHint");
-
-const selectedWrap = document.getElementById("selectedWrap");
-const selectedName = document.getElementById("selectedName");
 const clearBranch = document.getElementById("clearBranch");
 
-const orderBtn = document.getElementById("orderBtn");
-const orderBtnMobile = document.getElementById("orderBtnMobile");
-const orderHeroBtn = document.getElementById("orderHeroBtn");
-
-const menuTabs = document.getElementById("menuTabs");
-const menuGrid = document.getElementById("menuGrid");
-const menuSearch = document.getElementById("menuSearch");
 const menuStatus = document.getElementById("menuStatus");
+const catBar = document.getElementById("catBar");
+const menuSections = document.getElementById("menuSections");
 
 const menuModal = document.getElementById("menuModal");
 const modalTitle = document.getElementById("modalTitle");
-const modalDesc = document.getElementById("modalDesc");
 const modalCategory = document.getElementById("modalCategory");
 const modalPrice = document.getElementById("modalPrice");
-const modalTags = document.getElementById("modalTags");
+const modalLines = document.getElementById("modalLines");
 
-const yearEl = document.getElementById("year");
-if (yearEl) yearEl.textContent = new Date().getFullYear();
+/* hero slider */
+const heroImg = document.getElementById("heroImg");
+const heroPrev = document.getElementById("heroPrev");
+const heroNext = document.getElementById("heroNext");
+const heroIndex = document.getElementById("heroIndex");
+const heroTotal = document.getElementById("heroTotal");
 
 /* ---------- Helpers ---------- */
+if (yearEl) yearEl.textContent = new Date().getFullYear();
+
 function moneyGBP(n) {
   if (typeof n !== "number" || Number.isNaN(n)) return "£—";
   return `£${n.toFixed(2)}`;
@@ -169,42 +162,23 @@ function stripHtml(html) {
   return (tmp.textContent || tmp.innerText || "").trim();
 }
 
+function hasImage(item) {
+  return Boolean(item.image && String(item.image).trim().length > 0);
+}
+
 function setOrderEnabled(enabled, url) {
-  const items = [orderBtn, orderBtnMobile, orderHeroBtn];
-  items.forEach((el) => {
-    if (!el) return;
-    if (enabled) {
-      el.setAttribute("aria-disabled", "false");
-      el.href = url;
-      el.target = "_blank";
-      el.rel = "noopener noreferrer";
-    } else {
-      el.setAttribute("aria-disabled", "true");
-      el.href = "#locations";
-      el.removeAttribute("target");
-      el.removeAttribute("rel");
-    }
-  });
-}
-
-function highlightSelected(branchId) {
-  document.querySelectorAll(".store").forEach((card) => {
-    card.classList.toggle("is-selected", card.dataset.id === branchId);
-  });
-}
-
-function setSelectedBranch(branch) {
-  if (!branch) {
-    selectedWrap.hidden = true;
-    selectedName.textContent = "—";
-    setOrderEnabled(false, "#locations");
-    highlightSelected(null);
-    return;
+  if (!orderBtn) return;
+  if (enabled) {
+    orderBtn.setAttribute("aria-disabled", "false");
+    orderBtn.href = url;
+    orderBtn.target = "_blank";
+    orderBtn.rel = "noopener noreferrer";
+  } else {
+    orderBtn.setAttribute("aria-disabled", "true");
+    orderBtn.href = "#locations";
+    orderBtn.removeAttribute("target");
+    orderBtn.removeAttribute("rel");
   }
-  selectedWrap.hidden = false;
-  selectedName.textContent = branch.name;
-  setOrderEnabled(true, branch.orderUrl);
-  highlightSelected(branch.id);
 }
 
 /* Haversine distance (km) */
@@ -286,6 +260,22 @@ function renderStoreGrid(list) {
   highlightSelected(branchSelect.value || null);
 }
 
+function highlightSelected(branchId) {
+  document.querySelectorAll(".store").forEach((card) => {
+    card.classList.toggle("is-selected", card.dataset.id === branchId);
+  });
+}
+
+function setSelectedBranch(branch) {
+  if (!branch) {
+    setOrderEnabled(false, "#locations");
+    highlightSelected(null);
+    return;
+  }
+  setOrderEnabled(true, branch.orderUrl);
+  highlightSelected(branch.id);
+}
+
 /* =========================================================
    MENU: Convert proxy JSON → our menu model
    ========================================================= */
@@ -359,13 +349,11 @@ async function loadMenuFromProxy() {
 
     return {
       id: String(p?.id ?? crypto.randomUUID()),
-      name: String(p?.name ?? "Item"),
-      category,
+      name: String(p?.name ?? "Item").toUpperCase(),
+      category: String(category || "Menu"),
       price,
       description: desc,
       tags: toTagsFromStoreApi(p),
-
-      // priority: local -> api -> none
       image: localImg || apiImg || "",
     };
   });
@@ -374,162 +362,176 @@ async function loadMenuFromProxy() {
   menuStatus.textContent = MENU.length ? "" : "Menu is empty.";
 }
 
+/* =========================================================
+   Wix-like rendering (category bar + sections)
+   ========================================================= */
+const CATEGORY_ORDER = [
+  "Specials",
+  "Burgers",
+  "Loaded Fries",
+  "Wings",
+  "Milkshakes",
+  "Sides",
+  "Sauces",
+];
 
-let activeCategory = "Featured";
-
-function hasImage(item) {
-  return Boolean(item.image && String(item.image).trim().length > 0);
+function normalizeCat(c) {
+  return String(c || "").trim();
 }
 
-function isFeaturedItem(item) {
-  const cat = String(item.category || "").toLowerCase();
-  return hasImage(item) && (cat === "burgers" || cat === "loaded fries");
+function getCategoriesOrdered() {
+  const set = new Set(MENU.map((x) => normalizeCat(x.category)));
+  const cats = Array.from(set);
+
+  // Order by our preferred list, then alphabetical for leftovers
+  const ordered = [];
+  for (const c of CATEGORY_ORDER) {
+    if (cats.includes(c)) ordered.push(c);
+  }
+  const leftovers = cats.filter((c) => !ordered.includes(c)).sort((a, b) => a.localeCompare(b));
+  return [...ordered, ...leftovers];
 }
 
-/* ---------- Tabs list ---------- */
-function getCategories() {
-  const set = new Set(MENU.map((x) => x.category));
-  const cats = Array.from(set).sort((a, b) => a.localeCompare(b));
-  return ["Featured", "All", ...cats];
+function splitToLines(item) {
+  // Wix shows each ingredient on its own line.
+  // We convert description into "lines" by splitting on commas / bullets / pipes / newlines.
+  const raw = String(item.description || "")
+    .replace(/\r/g, "")
+    .replace(/•/g, ",")
+    .replace(/\|/g, ",")
+    .trim();
+
+  if (!raw) return [];
+
+  const parts = raw
+    .split(/\n|,/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  // If it's one long sentence, keep it as one line
+  if (parts.length <= 1) return [raw.toUpperCase()];
+
+  return parts.map((x) => x.toUpperCase());
 }
 
-function renderTabs() {
-  menuTabs.innerHTML = "";
-  const cats = getCategories();
+function scrollToSection(cat) {
+  const id = `cat-${cat.toLowerCase().replace(/\s+/g, "-")}`;
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function renderCategoryBar(activeCat) {
+  catBar.innerHTML = "";
+  const cats = getCategoriesOrdered();
 
   cats.forEach((cat) => {
     const btn = document.createElement("button");
-    btn.className = "tab";
+    btn.className = "catBtn" + (cat === activeCat ? " is-active" : "");
     btn.type = "button";
-    btn.setAttribute("role", "tab");
-    btn.setAttribute("aria-selected", String(cat === activeCategory));
-    btn.textContent = cat;
+    btn.textContent = cat.toUpperCase();
+    btn.addEventListener("click", () => scrollToSection(cat));
+    catBar.appendChild(btn);
+  });
+}
 
-    btn.addEventListener("click", () => {
-      activeCategory = cat;
-      if (menuSearch) menuSearch.value = ""; // optional: clear search when switching
-      renderTabs();
-      renderMenuGrid();
+function renderMenuSections() {
+  menuSections.innerHTML = "";
+
+  const cats = getCategoriesOrdered();
+  renderCategoryBar(cats[0] || "Menu");
+
+  cats.forEach((cat) => {
+    const section = document.createElement("section");
+    section.className = "menuSection";
+    section.id = `cat-${cat.toLowerCase().replace(/\s+/g, "-")}`;
+
+    const head = document.createElement("div");
+    head.className = "menuSection__head";
+    head.textContent = cat.toUpperCase();
+    section.appendChild(head);
+
+    const items = MENU.filter((x) => normalizeCat(x.category) === cat);
+
+    // Wix: image is always shown. We still render even if missing (empty space)
+    items.forEach((item) => {
+      const row = document.createElement("article");
+      row.className = "menuItem";
+      row.tabIndex = 0;
+
+      const img = hasImage(item)
+        ? `<img class="menuItem__img" src="${item.image}" alt="${item.name}" loading="lazy" />`
+        : `<div class="menuItem__img" aria-hidden="true"></div>`;
+
+      const lines = splitToLines(item)
+        .slice(0, 18)
+        .map((l) => `<div class="line">${escapeHtml(l)}</div>`)
+        .join("");
+
+      row.innerHTML = `
+        <div class="menuItem__left">
+          ${img}
+        </div>
+        <div class="menuItem__right">
+          <div class="menuItem__meta">
+            <h3 class="menuItem__name">${escapeHtml(item.name)}</h3>
+            <div class="menuItem__price">${moneyGBP(item.price)}</div>
+          </div>
+
+          <div class="menuItem__lines">${lines}</div>
+
+          <div class="menuItem__row">
+            <a class="smallLink" href="#" onclick="return false;">ALLERGENS</a>
+          </div>
+        </div>
+      `;
+
+      const open = () => openMenuModal(item);
+      row.addEventListener("click", (e) => {
+        const tag = e.target.tagName.toLowerCase();
+        if (tag === "a") return; // allergens link is placeholder
+        open();
+      });
+      row.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          open();
+        }
+      });
+
+      section.appendChild(row);
     });
 
-    menuTabs.appendChild(btn);
-  });
-}
-
-function matchesSearch(item, q) {
-  if (!q) return true;
-  const hay = `${item.name} ${item.description || ""} ${(item.tags || []).join(
-    " "
-  )} ${item.category}`.toLowerCase();
-  return hay.includes(q);
-}
-
-function getFilteredMenu() {
-  const q = (menuSearch?.value || "").trim().toLowerCase();
-  const searching = q.length > 0;
-
-  return MENU.filter((item) => {
-    // Category filter:
-    // - When searching, ignore category lock (user wants full menu)
-    let catOk = true;
-
-    if (!searching) {
-      if (activeCategory === "Featured") {
-        catOk = isFeaturedItem(item);
-      } else if (activeCategory === "All") {
-        catOk = true;
-      } else {
-        catOk = item.category === activeCategory;
-      }
-    }
-
-    // Search filter:
-    const searchOk = searching ? matchesSearch(item, q) : true;
-
-    return catOk && searchOk;
-  });
-}
-
-function menuCard(item) {
-  const el = document.createElement("article");
-  el.className = "menuItem";
-  el.tabIndex = 0;
-
-  const tags = (item.tags || [])
-    .slice(0, 4)
-    .map((t) => `<span class="pill">${t}</span>`)
-    .join("");
-
-  // REQUIRED ORDER: Name → Description → Image
-  const imgHtml = hasImage(item)
-    ? `<img class="menuItem__img" src="${item.image}" alt="${item.name}" loading="lazy" />`
-    : "";
-
-  el.innerHTML = `
-    <div class="menuItem__top">
-      <h3 class="menuItem__name">${item.name}</h3>
-      <span class="menuItem__price">${moneyGBP(item.price)}</span>
-    </div>
-
-    <p class="menuItem__desc">${item.description || ""}</p>
-
-    ${imgHtml}
-
-    <div class="menuItem__tags">${tags}</div>
-  `;
-
-  const open = () => openMenuModal(item);
-  el.addEventListener("click", open);
-  el.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      open();
-    }
+    menuSections.appendChild(section);
   });
 
-  return el;
+  // highlight active category while scrolling
+  setupActiveCategoryObserver();
 }
 
-function renderMenuGrid() {
-  const list = getFilteredMenu();
-
-  list.sort((a, b) => {
-    const aHasImg = hasImage(a) ? 1 : 0;
-    const bHasImg = hasImage(b) ? 1 : 0;
-
-    
-    if (aHasImg !== bHasImg) return bHasImg - aHasImg;
-
-    
-    if (activeCategory === "Featured") {
-      const aCat = String(a.category || "").toLowerCase();
-      const bCat = String(b.category || "").toLowerCase();
-
-      if (aCat === "burgers" && bCat === "loaded fries") return -1;
-      if (aCat === "loaded fries" && bCat === "burgers") return 1;
-    }
-
-    // Otherwise keep original order
-    return 0;
-  });
-
-  menuGrid.innerHTML = "";
-  list.forEach((item) => menuGrid.appendChild(menuCard(item)));
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
-/* ---------- Modal ---------- */
+/* =========================================================
+   Modal
+   ========================================================= */
 function openMenuModal(item) {
   modalTitle.textContent = item.name;
-  modalDesc.textContent = item.description || "";
-  modalCategory.textContent = item.category || "Menu";
+  modalCategory.textContent = (item.category || "Menu").toUpperCase();
   modalPrice.textContent = moneyGBP(item.price);
 
-  modalTags.innerHTML = "";
-  (item.tags || []).forEach((t) => {
-    const span = document.createElement("span");
-    span.className = "pill";
-    span.textContent = t;
-    modalTags.appendChild(span);
+  modalLines.innerHTML = "";
+  splitToLines(item).slice(0, 24).forEach((l) => {
+    const div = document.createElement("div");
+    div.className = "line";
+    div.textContent = l;
+    modalLines.appendChild(div);
   });
 
   menuModal.classList.add("is-open");
@@ -547,65 +549,46 @@ menuModal.addEventListener("click", (e) => {
   const close = e.target?.dataset?.close === "1";
   if (close) closeMenuModal();
 });
-
 window.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && menuModal.classList.contains("is-open")) {
     closeMenuModal();
   }
 });
 
-/* ---------- Header scroll behavior ---------- */
-window.addEventListener("scroll", () => {
-  header.classList.toggle("header--scrolled", window.scrollY > 60);
-});
+/* =========================================================
+   Active category highlighting (while scrolling)
+   ========================================================= */
+let catObserver = null;
 
-/* ---------- Mobile menu behavior ---------- */
-if (burgerBtn) {
-  burgerBtn.addEventListener("click", () => {
-    const isOpen = burgerBtn.getAttribute("aria-expanded") === "true";
-    burgerBtn.setAttribute("aria-expanded", String(!isOpen));
-    mobileMenu.hidden = isOpen;
-  });
+function setupActiveCategoryObserver() {
+  if (catObserver) catObserver.disconnect();
+
+  const catIds = getCategoriesOrdered().map((cat) => `cat-${cat.toLowerCase().replace(/\s+/g, "-")}`);
+  const els = catIds.map((id) => document.getElementById(id)).filter(Boolean);
+
+  if (!els.length) return;
+
+  catObserver = new IntersectionObserver(
+    (entries) => {
+      // pick the most visible
+      const visible = entries
+        .filter((e) => e.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+      if (!visible) return;
+      const id = visible.target.id.replace("cat-", "");
+      const activeCat = id.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+      renderCategoryBar(activeCat);
+    },
+    { root: null, threshold: [0.12, 0.2, 0.35, 0.5] }
+  );
+
+  els.forEach((el) => catObserver.observe(el));
 }
 
-function syncMobileMenuForDesktop() {
-  if (window.innerWidth > 720) {
-    if (burgerBtn) burgerBtn.setAttribute("aria-expanded", "false");
-    if (mobileMenu) mobileMenu.hidden = true;
-  }
-}
-window.addEventListener("resize", syncMobileMenuForDesktop);
-
-/* ---------- Events: Branch select ---------- */
-branchSelect.addEventListener("change", () => {
-  const id = branchSelect.value;
-  const branch = BRANCHES.find((b) => b.id === id) || null;
-  geoHint.textContent = "";
-  setSelectedBranch(branch);
-});
-
-clearBranch.addEventListener("click", () => {
-  branchSelect.value = "";
-  geoHint.textContent = "";
-  setSelectedBranch(null);
-});
-
-storeSearch.addEventListener("input", () => {
-  const q = storeSearch.value.trim().toLowerCase();
-  if (!q) return renderStoreGrid(BRANCHES);
-
-  const filtered = BRANCHES.filter((b) => {
-    return (
-      b.name.toLowerCase().includes(q) ||
-      b.town.toLowerCase().includes(q) ||
-      (b.postcode || "").toLowerCase().includes(q)
-    );
-  });
-
-  renderStoreGrid(filtered);
-});
-
-/* ---------- Geo: closest branch ---------- */
+/* =========================================================
+   Geo
+   ========================================================= */
 geoBtn.addEventListener("click", () => {
   geoHint.textContent = "Requesting location…";
 
@@ -626,50 +609,77 @@ geoBtn.addEventListener("click", () => {
 
       branchSelect.value = branch.id;
       setSelectedBranch(branch);
-      geoHint.textContent = `Closest branch: ${branch.town} (${distanceKm.toFixed(
-        1
-      )} km).`;
-
-      const locSection = document.getElementById("locations");
-      if (locSection) {
-        locSection.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+      geoHint.textContent = `Closest branch: ${branch.town} (${distanceKm.toFixed(1)} km).`;
     },
     (err) => {
-      if (err.code === err.PERMISSION_DENIED)
-        geoHint.textContent = "Location permission denied.";
+      if (err.code === err.PERMISSION_DENIED) geoHint.textContent = "Location permission denied.";
       else geoHint.textContent = "Could not get your location.";
     },
     { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
   );
 });
 
-/* Menu search:
-   
-*/
-menuSearch.addEventListener("input", () => renderMenuGrid());
+branchSelect.addEventListener("change", () => {
+  const id = branchSelect.value;
+  const branch = BRANCHES.find((b) => b.id === id) || null;
+  geoHint.textContent = "";
+  setSelectedBranch(branch);
+});
 
-/* ---------- Init ---------- */
+clearBranch.addEventListener("click", () => {
+  branchSelect.value = "";
+  geoHint.textContent = "";
+  setSelectedBranch(null);
+});
+
+/* =========================================================
+   Hero slider (simple)
+   Replace these with your 6 Wix images if you have them locally.
+   ========================================================= */
+const HERO_IMAGES = [
+  "assets/mae-mu-I7A_pHLcQK8-unsplash.jpg",
+  "assets/mae-mu-I7A_pHLcQK8-unsplash.jpg",
+  "assets/mae-mu-I7A_pHLcQK8-unsplash.jpg",
+  "assets/mae-mu-I7A_pHLcQK8-unsplash.jpg",
+  "assets/mae-mu-I7A_pHLcQK8-unsplash.jpg",
+  "assets/mae-mu-I7A_pHLcQK8-unsplash.jpg",
+];
+
+let heroPos = 0;
+
+function renderHero() {
+  if (!heroImg) return;
+  heroTotal.textContent = String(HERO_IMAGES.length);
+  heroIndex.textContent = String(heroPos + 1);
+  heroImg.src = HERO_IMAGES[heroPos];
+}
+
+function heroStep(delta) {
+  heroPos = (heroPos + delta + HERO_IMAGES.length) % HERO_IMAGES.length;
+  renderHero();
+}
+
+if (heroPrev) heroPrev.addEventListener("click", () => heroStep(-1));
+if (heroNext) heroNext.addEventListener("click", () => heroStep(1));
+
+/* =========================================================
+   Init
+   ========================================================= */
 (function init() {
-  syncMobileMenuForDesktop();
-
-  // Branches
+  // Locations
   renderSelectOptions();
   renderStoreGrid(BRANCHES);
   setSelectedBranch(null);
 
+  // Hero
+  renderHero();
+
   // Menu (API first, fallback if fails)
   loadMenuFromProxy()
-    .then(() => {
-      activeCategory = "Featured"; // default view
-      renderTabs();
-      renderMenuGrid();
-    })
+    .then(() => renderMenuSections())
     .catch((err) => {
       console.warn("Menu load failed, using fallback MENU:", err);
       menuStatus.textContent = "Menu unavailable right now. (Fallback loaded.)";
-      activeCategory = "Featured";
-      renderTabs();
-      renderMenuGrid();
+      renderMenuSections();
     });
 })();
