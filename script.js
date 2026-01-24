@@ -81,7 +81,8 @@ const MENU_PROXY_ENDPOINT =
   "https://burger8-menu-proxy.parsazahedi78.workers.dev/menu";
 
 /* =========================================================
-   LOCAL MENU IMAGES
+   LOCAL MENU IMAGES (ALL PNGs)
+   IMPORTANT: filenames must match your assets exactly
    ========================================================= */
 const IMAGE_BASE = "assets/PNG-20260116T144520Z-3-001/PNG";
 
@@ -96,16 +97,222 @@ const LOCAL_IMAGE_MAP = {
     `${IMAGE_BASE}/Burgers/No.2.png`,
     `${IMAGE_BASE}/Burgers/No.1.png`,
   ],
+
+  "Loaded Fries": [
+    `${IMAGE_BASE}/Loaded Fries/BBQ Bacon Loaded Fries.png`,
+    `${IMAGE_BASE}/Loaded Fries/Burger Loaded Fries.png`,
+    `${IMAGE_BASE}/Loaded Fries/Chicken Loaded Fries.png`,
+    `${IMAGE_BASE}/Loaded Fries/Original Loaded Fries.png`,
+    `${IMAGE_BASE}/Loaded Fries/Spicy Loaded Fries.png`,
+  ],
+
+  Sauces: [
+    `${IMAGE_BASE}/Sauces/BBQ Sauce.png`,
+    `${IMAGE_BASE}/Sauces/Buffalo Sauce.png`,
+    `${IMAGE_BASE}/Sauces/Chipotle Sauce.png`,
+    `${IMAGE_BASE}/Sauces/Garlic Mayo.png`,
+    `${IMAGE_BASE}/Sauces/Ketchup.png`,
+    `${IMAGE_BASE}/Sauces/Mayo.png`,
+    `${IMAGE_BASE}/Sauces/Sriracha Sauce.png`,
+    `${IMAGE_BASE}/Sauces/Sweet Chilli.png`,
+  ],
+
+  Shakes: [
+    `${IMAGE_BASE}/Shakes/Biscoff.png`,
+    `${IMAGE_BASE}/Shakes/Bubblegum.png`,
+    `${IMAGE_BASE}/Shakes/Caramel.png`,
+    `${IMAGE_BASE}/Shakes/DSC08103-Edit.png`,
+    `${IMAGE_BASE}/Shakes/Kinder Bueno.png`,
+    `${IMAGE_BASE}/Shakes/Malteaser.png`,
+    `${IMAGE_BASE}/Shakes/Nutella.png`,
+    `${IMAGE_BASE}/Shakes/Oreo.png`,
+  ],
+
+  Sides: [
+    `${IMAGE_BASE}/Sides/Fries.png`,
+    `${IMAGE_BASE}/Sides/Jalapeno Cheese Bites.png`,
+    `${IMAGE_BASE}/Sides/Mozzerella Sticks.png`,
+    `${IMAGE_BASE}/Sides/Onion Rings.png`,
+    `${IMAGE_BASE}/Sides/Sweet Potato Fries.png`,
+  ],
+
+  Wings: [
+    `${IMAGE_BASE}/Wings/BBQ Wings.png`,
+    `${IMAGE_BASE}/Wings/Buffalo Wings.png`,
+    `${IMAGE_BASE}/Wings/Chipotle Wings.png`,
+    `${IMAGE_BASE}/Wings/Salt & Pepper Wings.png`,
+    `${IMAGE_BASE}/Wings/Sriracha Wings.png`,
+    `${IMAGE_BASE}/Wings/Sweet Chilli Wings.png`,
+  ],
 };
 
-const LOADED_FRIES_IMAGES = {
-  "bbq bacon loaded fries": `${IMAGE_BASE}/Loaded Fries/BBQ Bacon Loaded Fries.png`,
-  "burger loaded fries": `${IMAGE_BASE}/Loaded Fries/Burger Loaded Fries.png`,
-  "chicken loaded fries": `${IMAGE_BASE}/Loaded Fries/Chicken Loaded Fries.png`,
-  "original loaded fries": `${IMAGE_BASE}/Loaded Fries/Original Loaded Fries.png`,
-  "spicy loaded fries": `${IMAGE_BASE}/Loaded Fries/Spicy Loaded Fries.png`,
+/* =========================================================
+   SMART IMAGE RESOLVER v2 (fuzzy + fallback so PNGs don't disappear)
+   ========================================================= */
+
+// Map API category names -> your folder names
+const CATEGORY_ALIAS = {
+  Milkshakes: "Shakes",
+  "Milk Shakes": "Shakes",
+  Shake: "Shakes",
+  "Loaded fries": "Loaded Fries",
+  "Loaded Fries ": "Loaded Fries",
+  Sauce: "Sauces",
+  "Burger Sauces": "Sauces",
+  Side: "Sides",
+  "Wings ": "Wings",
 };
 
+function normalizeCategory(cat) {
+  const c = String(cat || "").trim();
+  return CATEGORY_ALIAS[c] || c;
+}
+
+function normKey(s) {
+  return String(s || "")
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/['’]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+function fileBase(path) {
+  const p = String(path || "");
+  const just = p.split("/").pop() || p;
+  return just.replace(/\.[^.]+$/, "");
+}
+
+// category -> [{src, key, index, tokens}]
+const LOCAL_LIST = (() => {
+  const out = {};
+  for (const [cat, arr] of Object.entries(LOCAL_IMAGE_MAP)) {
+    out[cat] = arr.map((src, index) => {
+      const base = fileBase(src);
+      const key = normKey(base);
+      const tokens = new Set(key.split(" ").filter(Boolean));
+      return { src, key, index, tokens };
+    });
+  }
+  return out;
+})();
+
+// Track used images per category so fallback assigns next unused one
+const USED_LOCAL_INDEX = (() => {
+  const out = {};
+  for (const cat of Object.keys(LOCAL_IMAGE_MAP)) out[cat] = new Set();
+  return out;
+})();
+
+function burgerNumberFromName(name) {
+  const n = String(name || "").toUpperCase();
+  let m = n.match(/#\s*(\d+)/);
+  if (m) return Number(m[1]);
+  m = n.match(/\bNO\.?\s*(\d+)\b/);
+  if (m) return Number(m[1]);
+  m = n.match(/^\s*(\d+)\b/);
+  if (m) return Number(m[1]);
+  return null;
+}
+
+// Simple token overlap score (0..1)
+function overlapScore(aTokens, bTokens) {
+  if (!aTokens.size || !bTokens.size) return 0;
+  let hit = 0;
+  for (const t of aTokens) if (bTokens.has(t)) hit++;
+  return hit / Math.max(aTokens.size, bTokens.size);
+}
+
+// Pick best matching image in category (fuzzy)
+function bestMatchInCategory(category, itemName) {
+  const list = LOCAL_LIST[category];
+  if (!list || !list.length) return null;
+
+  const itemKey = normKey(itemName);
+  const itemTokens = new Set(itemKey.split(" ").filter(Boolean));
+
+  // 1) Exact key match
+  const exact = list.find((x) => x.key === itemKey);
+  if (exact) return exact;
+
+  // 2) Contains match
+  const contains = list.find((x) => itemKey.includes(x.key) || x.key.includes(itemKey));
+  if (contains) return contains;
+
+  // 3) Token overlap (fuzzy)
+  let best = null;
+  let bestScore = 0;
+  for (const cand of list) {
+    const s = overlapScore(itemTokens, cand.tokens);
+    if (s > bestScore) {
+      bestScore = s;
+      best = cand;
+    }
+  }
+
+  // Require a small minimum so we don't randomly match
+  if (best && bestScore >= 0.34) return best;
+
+  return null;
+}
+
+// Fallback: pick next unused image in category (so PNGs never disappear)
+function nextUnusedInCategory(category) {
+  const list = LOCAL_LIST[category];
+  if (!list || !list.length) return null;
+
+  const used = USED_LOCAL_INDEX[category] || new Set();
+  const free = list.find((x) => !used.has(x.index));
+  return free || list[0]; // if all used, allow reuse
+}
+
+/**
+ * Returns: {src, index} OR null
+ * Strategy:
+ * 1) Burgers: use number mapping -> No.X.png
+ * 2) Fuzzy match by name to filename
+ * 3) Fallback: next unused PNG in that folder (so images don't disappear)
+ */
+function resolveLocalImage(categoryRaw, itemNameRaw) {
+  const category = normalizeCategory(categoryRaw);
+  const name = String(itemNameRaw || "");
+
+  // Burger special: map by number first (most reliable)
+  if (category === "Burgers") {
+    const num = burgerNumberFromName(name);
+    if (num != null) {
+      const targetKey1 = normKey(`No.${num}`);
+      const targetKey2 = normKey(`No ${num}`);
+      const list = LOCAL_LIST.Burgers || [];
+      const hit = list.find((x) => x.key === targetKey1) || list.find((x) => x.key === targetKey2);
+      if (hit) {
+        USED_LOCAL_INDEX.Burgers.add(hit.index);
+        return hit;
+      }
+    }
+  }
+
+  // Try fuzzy match
+  const matched = bestMatchInCategory(category, name);
+  if (matched) {
+    USED_LOCAL_INDEX[category]?.add(matched.index);
+    return matched;
+  }
+
+  // Fallback: assign some PNG from the same folder
+  const fallback = nextUnusedInCategory(category);
+  if (fallback) {
+    USED_LOCAL_INDEX[category]?.add(fallback.index);
+    return fallback;
+  }
+
+  return null;
+}
+
+/* =========================================================
+   MENU (fallback)
+   ========================================================= */
 let MENU = [
   {
     id: "fallback-1",
@@ -116,6 +323,7 @@ let MENU = [
       "SERVED WITH SEASONED FRIES, 2 x SMASHED BEEF PATTIES, CHEESE, LETTUCE, RED ONION, DILL PICKLE, HOMEMADE BURGER SAUCE, TOASTED BRIOCHE BUN, LEVEL UP?, EXTRA TOPPINGS",
     tags: ["BEEF"],
     image: `${IMAGE_BASE}/Burgers/No.1.png`,
+    _localOrder: 0,
   },
 ];
 
@@ -190,6 +398,14 @@ function stripHtml(html) {
 
 function hasImage(item) {
   return Boolean(item.image && String(item.image).trim().length > 0);
+}
+
+/* Featured = items with png image */
+function hasPngImage(item) {
+  const src = String(item?.image || "").trim();
+  if (!src) return false;
+  const clean = src.split("?")[0].toLowerCase();
+  return clean.endsWith(".png");
 }
 
 function setOrderEnabled(enabled, url) {
@@ -295,15 +511,23 @@ function renderCart() {
     row.innerHTML = `
       <div>
         <div class="cartItem__name">${escapeHtml(item.name)}</div>
-        <div class="cartItem__meta">${escapeHtml(item.category || "")} • ${moneyGBP(Number(item.price) || 0)}</div>
+        <div class="cartItem__meta">${escapeHtml(item.category || "")} • ${moneyGBP(
+          Number(item.price) || 0
+        )}</div>
       </div>
       <div class="cartItem__right">
         <div class="qty">
-          <button class="qtyBtn" type="button" data-act="dec" data-id="${escapeHtml(item.id)}">−</button>
+          <button class="qtyBtn" type="button" data-act="dec" data-id="${escapeHtml(
+            item.id
+          )}">−</button>
           <div class="qtyVal">${item.qty}</div>
-          <button class="qtyBtn" type="button" data-act="inc" data-id="${escapeHtml(item.id)}">+</button>
+          <button class="qtyBtn" type="button" data-act="inc" data-id="${escapeHtml(
+            item.id
+          )}">+</button>
         </div>
-        <button class="removeBtn" type="button" data-act="rm" data-id="${escapeHtml(item.id)}">Remove</button>
+        <button class="removeBtn" type="button" data-act="rm" data-id="${escapeHtml(
+          item.id
+        )}">Remove</button>
       </div>
     `;
 
@@ -514,7 +738,7 @@ function initBranchMap() {
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors',
+    attribution: "&copy; OpenStreetMap contributors",
   }).addTo(branchMap);
 
   branchLayer = L.layerGroup().addTo(branchMap);
@@ -639,7 +863,9 @@ geoBtn?.addEventListener("click", () => {
 
       if (branchSelect) branchSelect.value = branch.id;
       setSelectedBranch(branch, { panMap: true, openPopup: true });
-      if (geoHint) geoHint.textContent = `Closest branch: ${branch.town} (${distanceKm.toFixed(1)} km).`;
+      if (geoHint) geoHint.textContent = `Closest branch: ${branch.town} (${distanceKm.toFixed(
+        1
+      )} km).`;
     },
     (err) => {
       if (!geoHint) return;
@@ -664,7 +890,7 @@ clearBranch?.addEventListener("click", () => {
 });
 
 /* =========================================================
-   MENU: 
+   MENU: API mapping
    ========================================================= */
 function toPriceNumberFromStoreApi(p) {
   try {
@@ -681,9 +907,7 @@ function toPriceNumberFromStoreApi(p) {
 
 function toCategoryFromStoreApi(p) {
   const cat =
-    p?.categories && p.categories[0] && p.categories[0].name
-      ? p.categories[0].name
-      : "Menu";
+    p?.categories && p.categories[0] && p.categories[0].name ? p.categories[0].name : "Menu";
   return cat;
 }
 
@@ -695,39 +919,38 @@ function toImageFromStoreApi(p) {
 async function loadMenuFromProxy() {
   if (menuStatus) menuStatus.textContent = "Loading menu…";
 
+  // reset used markers per load so fallbacks distribute nicely
+  for (const cat of Object.keys(USED_LOCAL_INDEX)) USED_LOCAL_INDEX[cat].clear();
+
   const res = await fetch(MENU_PROXY_ENDPOINT, { method: "GET" });
   if (!res.ok) throw new Error(`Menu proxy HTTP ${res.status}`);
 
   const data = await res.json();
   if (!Array.isArray(data)) throw new Error("Menu proxy returned non-array JSON");
 
-  const categoryCounters = {};
   const mapped = data.map((p) => {
-    const category = toCategoryFromStoreApi(p);
+    const rawCategory = toCategoryFromStoreApi(p);
+    const category = normalizeCategory(rawCategory);
+
     const price = toPriceNumberFromStoreApi(p);
     const desc = stripHtml(p?.short_description || p?.description || "");
     const apiImg = toImageFromStoreApi(p);
 
-    const idx = categoryCounters[category] ?? 0;
-    categoryCounters[category] = idx + 1;
+    const nameRaw = String(p?.name ?? "Item");
+    const name = nameRaw.toUpperCase();
 
-    const nameKey = String(p?.name || "").toLowerCase().trim();
-
-    let localImg = "";
-    if (category === "Loaded Fries") {
-      localImg = LOADED_FRIES_IMAGES[nameKey] || "";
-    }
-    if (!localImg) {
-      localImg = LOCAL_IMAGE_MAP[category]?.[idx] || "";
-    }
+    //  SMART local match (by name) + fallback so PNGs don't disappear
+    const localMatch = resolveLocalImage(category, nameRaw);
+    const localImg = localMatch?.src || "";
 
     return {
       id: String(p?.id ?? crypto.randomUUID()),
-      name: String(p?.name ?? "Item").toUpperCase(),
+      name,
       category: String(category || "Menu"),
       price,
       description: desc,
       image: localImg || apiImg || "",
+      _localOrder: Number.isFinite(localMatch?.index) ? localMatch.index : 9999,
     };
   });
 
@@ -738,7 +961,8 @@ async function loadMenuFromProxy() {
 /* =========================================================
     category bar + sections
    ========================================================= */
-const CATEGORY_ORDER = ["Specials", "Burgers", "Loaded Fries", "Wings", "Milkshakes", "Sides", "Sauces"];
+// Match VS Code folder order
+const CATEGORY_ORDER = ["Burgers", "Loaded Fries", "Sauces", "Shakes", "Sides", "Wings", "Specials"];
 
 function normalizeCat(c) {
   return String(c || "").trim();
@@ -751,8 +975,11 @@ function getCategoriesOrdered() {
   const ordered = [];
   for (const c of CATEGORY_ORDER) if (cats.includes(c)) ordered.push(c);
 
-  const leftovers = cats.filter((c) => !ordered.includes(c)).sort((a, b) => a.localeCompare(b));
-  return [...ordered, ...leftovers];
+  const leftovers = cats
+    .filter((c) => !ordered.includes(c))
+    .sort((a, b) => a.localeCompare(b));
+
+  return ["Featured", ...ordered, ...leftovers];
 }
 
 function splitToLines(item) {
@@ -763,7 +990,10 @@ function splitToLines(item) {
     .trim();
 
   if (!raw) return [];
-  const parts = raw.split(/\n|,/).map((s) => s.trim()).filter(Boolean);
+  const parts = raw
+    .split(/\n|,/)
+    .map((s) => s.trim())
+    .filter(Boolean);
   if (parts.length <= 1) return [raw.toUpperCase()];
   return parts.map((x) => x.toUpperCase());
 }
@@ -790,6 +1020,17 @@ function renderCategoryBar(activeCat) {
   });
 }
 
+function getLocalOrderVal(x) {
+  return Number.isFinite(x?._localOrder) ? x._localOrder : 9999;
+}
+
+// Featured order: Burgers first, then Fries, then rest by folder order
+function featuredCategoryRank(cat) {
+  const order = ["Burgers", "Loaded Fries", "Sauces", "Shakes", "Sides", "Wings", "Specials"];
+  const idx = order.indexOf(cat);
+  return idx === -1 ? 9999 : idx;
+}
+
 function renderMenuSections() {
   if (!menuSections) return;
   menuSections.innerHTML = "";
@@ -807,7 +1048,34 @@ function renderMenuSections() {
     head.textContent = cat.toUpperCase();
     section.appendChild(head);
 
-    const items = MENU.filter((x) => normalizeCat(x.category) === cat);
+    const items =
+      cat === "Featured"
+        ? MENU.filter(hasPngImage).sort((a, b) => {
+            const ar = featuredCategoryRank(a.category);
+            const br = featuredCategoryRank(b.category);
+            if (ar !== br) return ar - br;
+
+            const ao = getLocalOrderVal(a);
+            const bo = getLocalOrderVal(b);
+            if (ao !== bo) return ao - bo;
+
+            return String(a.name || "").localeCompare(String(b.name || ""));
+          })
+        : MENU.filter((x) => normalizeCat(x.category) === cat).sort((a, b) => {
+            const ao = getLocalOrderVal(a);
+            const bo = getLocalOrderVal(b);
+            if (ao !== bo) return ao - bo;
+            return String(a.name || "").localeCompare(String(b.name || ""));
+          });
+
+    if (cat === "Featured" && items.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "status";
+      empty.textContent = "No featured items yet.";
+      section.appendChild(empty);
+      menuSections.appendChild(section);
+      return;
+    }
 
     items.forEach((item) => {
       const row = document.createElement("article");
@@ -815,7 +1083,9 @@ function renderMenuSections() {
       row.tabIndex = 0;
 
       const img = hasImage(item)
-        ? `<img class="menuItem__img" src="${item.image}" alt="${escapeHtml(item.name)}" loading="lazy" />`
+        ? `<img class="menuItem__img" src="${item.image}" alt="${escapeHtml(
+            item.name
+          )}" loading="lazy" />`
         : `<div class="menuItem__img" aria-hidden="true"></div>`;
 
       const lines = splitToLines(item)
@@ -838,13 +1108,14 @@ function renderMenuSections() {
         </div>
       `;
 
-      // Click row -> modal (but not when clicking ADD)
       const open = () => openMenuModal(item);
+
       row.addEventListener("click", (e) => {
         const tag = e.target.tagName.toLowerCase();
         if (tag === "a" || tag === "button") return;
         open();
       });
+
       row.addEventListener("keydown", (e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
@@ -852,7 +1123,6 @@ function renderMenuSections() {
         }
       });
 
-      // ADD button
       const addBtn = row.querySelector("button.addBtn");
       addBtn?.addEventListener("click", (e) => {
         e.preventDefault();
@@ -882,12 +1152,14 @@ function openMenuModal(item) {
 
   if (modalLines) {
     modalLines.innerHTML = "";
-    splitToLines(item).slice(0, 24).forEach((l) => {
-      const div = document.createElement("div");
-      div.className = "line";
-      div.textContent = l;
-      modalLines.appendChild(div);
-    });
+    splitToLines(item)
+      .slice(0, 24)
+      .forEach((l) => {
+        const div = document.createElement("div");
+        div.className = "line";
+        div.textContent = l;
+        modalLines.appendChild(div);
+      });
   }
 
   if (modalAddToCart) {
