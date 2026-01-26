@@ -28,12 +28,8 @@
         <img src="assets/burger_8_logo.png" alt="Burger 8 logo" />
       </a>
 
-      <div class="topbar__right">
-        <button id="cartBtn" class="cartBtn" type="button" aria-label="Open cart">
-          CART <span id="cartCount" class="cartCount">0</span>
-        </button>
-        <a id="orderBtn" class="orderBtn" href="#locations" aria-disabled="true">ORDER</a>
-      </div>
+      <!-- ORDER/CART removed -->
+      <div class="topbar__right"></div>
     </div>
   </header>
 
@@ -59,7 +55,7 @@
   <section id="locations" class="locations" aria-label="Locations">
     <div class="locations__inner">
       <h2 class="locations__title">LOCATIONS</h2>
-      <p class="locations__hint">Select a branch to unlock ordering.</p>
+      <p class="locations__hint">Select a branch to view it on the map.</p>
 
       <div class="locations__controls">
         <select id="branchSelect" class="select">
@@ -84,7 +80,7 @@
     </div>
   </section>
 
-  <!-- Item modal -->
+  <!-- Item modal (kept, but no add-to-cart action) -->
   <div id="menuModal" class="modal" aria-hidden="true">
     <div class="modal__backdrop" data-close="1"></div>
     <div class="modal__card" role="dialog" aria-modal="true" aria-label="Menu item details">
@@ -97,45 +93,8 @@
 
       <h3 class="modal__title" id="modalTitle">Item</h3>
       <div id="modalLines" class="modal__lines"></div>
-
-      <div class="modal__actions">
-        <button id="modalAddToCart" class="modal__add" type="button">ADD TO CART</button>
-      </div>
     </div>
   </div>
-
-  <!-- Cart drawer -->
-  <aside id="cartDrawer" class="cartDrawer" aria-hidden="true">
-    <div class="cartDrawer__backdrop" data-cart-close="1"></div>
-
-    <div class="cartDrawer__panel" role="dialog" aria-modal="true" aria-label="Shopping cart">
-      <div class="cartDrawer__head">
-        <div class="cartDrawer__title">YOUR CART</div>
-        <button class="cartDrawer__close" type="button" data-cart-close="1" aria-label="Close cart">×</button>
-      </div>
-
-      <div id="cartEmpty" class="cartEmpty">Your cart is empty.</div>
-      <div id="cartList" class="cartList"></div>
-
-      <div class="cartSummary">
-        <div class="cartSummary__row">
-          <span>Items</span>
-          <span id="cartItemsCount">0</span>
-        </div>
-        <div class="cartSummary__row cartSummary__row--total">
-          <span>Total</span>
-          <span id="cartTotal">£0.00</span>
-        </div>
-
-        <div class="cartSummary__actions">
-          <button id="cartClear" class="btnGhost" type="button">Clear cart</button>
-          <button id="cartCheckout" class="btnPrimary" type="button">Checkout</button>
-        </div>
-
-        <p id="cartHint" class="status" style="margin:10px 0 0;"></p>
-      </div>
-    </div>
-  </aside>
 
   <footer class="footer">
     <span>© <span id="year"></span> Powered By BritEat</span>
