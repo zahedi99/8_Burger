@@ -1,4 +1,10 @@
 /* =========================================================
+   Burger 8 — script.js (Menu + Branch redirect + Map + API menu with PNG backup)
+   Option A: user selects a branch → redirect to branch order page
+   If menu API fails → show backup PNG menu image
+   ========================================================= */
+
+/* =========================================================
    BRANCHES
    ========================================================= */
 const BRANCHES = [
@@ -75,14 +81,17 @@ const BRANCHES = [
 ];
 
 /* =========================================================
-   MENU proxy
+   MENU: proxy + backup PNG
    ========================================================= */
 const MENU_PROXY_ENDPOINT =
   "https://burger8-menu-proxy.parsazahedi78.workers.dev/menu";
 
+// Backup image to show if API menu fails:
+const BACKUP_MENU_IMAGE = "assets/burger8_menu_converted.png";
+
 /* =========================================================
    LOCAL MENU IMAGES (ALL PNGs)
-   IMPORTANT: filenames must match your assets exactly
+   (Used to attach local PNGs to API items where possible)
    ========================================================= */
 const IMAGE_BASE = "assets/PNG-20260116T144520Z-3-001/PNG";
 
@@ -97,7 +106,6 @@ const LOCAL_IMAGE_MAP = {
     `${IMAGE_BASE}/Burgers/No.2.png`,
     `${IMAGE_BASE}/Burgers/No.1.png`,
   ],
-
   "Loaded Fries": [
     `${IMAGE_BASE}/Loaded Fries/BBQ Bacon Loaded Fries.png`,
     `${IMAGE_BASE}/Loaded Fries/Burger Loaded Fries.png`,
@@ -105,7 +113,6 @@ const LOCAL_IMAGE_MAP = {
     `${IMAGE_BASE}/Loaded Fries/Original Loaded Fries.png`,
     `${IMAGE_BASE}/Loaded Fries/Spicy Loaded Fries.png`,
   ],
-
   Sauces: [
     `${IMAGE_BASE}/Sauces/BBQ Sauce.png`,
     `${IMAGE_BASE}/Sauces/Buffalo Sauce.png`,
@@ -116,7 +123,6 @@ const LOCAL_IMAGE_MAP = {
     `${IMAGE_BASE}/Sauces/Sriracha Sauce.png`,
     `${IMAGE_BASE}/Sauces/Sweet Chilli.png`,
   ],
-
   Shakes: [
     `${IMAGE_BASE}/Shakes/Biscoff.png`,
     `${IMAGE_BASE}/Shakes/Bubblegum.png`,
@@ -127,7 +133,6 @@ const LOCAL_IMAGE_MAP = {
     `${IMAGE_BASE}/Shakes/Nutella.png`,
     `${IMAGE_BASE}/Shakes/Oreo.png`,
   ],
-
   Sides: [
     `${IMAGE_BASE}/Sides/Fries.png`,
     `${IMAGE_BASE}/Sides/Jalapeno Cheese Bites.png`,
@@ -135,7 +140,6 @@ const LOCAL_IMAGE_MAP = {
     `${IMAGE_BASE}/Sides/Onion Rings.png`,
     `${IMAGE_BASE}/Sides/Sweet Potato Fries.png`,
   ],
-
   Wings: [
     `${IMAGE_BASE}/Wings/BBQ Wings.png`,
     `${IMAGE_BASE}/Wings/Buffalo Wings.png`,
@@ -147,10 +151,8 @@ const LOCAL_IMAGE_MAP = {
 };
 
 /* =========================================================
-   SMART IMAGE RESOLVER v2
+   SMART IMAGE RESOLVER (fuzzy + fallback)
    ========================================================= */
-
-// Map API category names -> your folder names
 const CATEGORY_ALIAS = {
   Milkshakes: "Shakes",
   "Milk Shakes": "Shakes",
@@ -245,7 +247,6 @@ function bestMatchInCategory(category, itemName) {
       best = cand;
     }
   }
-
   if (best && bestScore >= 0.34) return best;
   return null;
 }
@@ -270,8 +271,7 @@ function resolveLocalImage(categoryRaw, itemNameRaw) {
       const targetKey2 = normKey(`No ${num}`);
       const list = LOCAL_LIST.Burgers || [];
       const hit =
-        list.find((x) => x.key === targetKey1) ||
-        list.find((x) => x.key === targetKey2);
+        list.find((x) => x.key === targetKey1) || list.find((x) => x.key === targetKey2);
       if (hit) {
         USED_LOCAL_INDEX.Burgers.add(hit.index);
         return hit;
@@ -295,22 +295,6 @@ function resolveLocalImage(categoryRaw, itemNameRaw) {
 }
 
 /* =========================================================
-   MENU (fallback)
-   ========================================================= */
-let MENU = [
-  {
-    id: "fallback-1",
-    name: "#1 CLASSIC",
-    category: "Burgers",
-    price: 10.6,
-    description:
-      "SERVED WITH SEASONED FRIES, 2 x SMASHED BEEF PATTIES, CHEESE, LETTUCE, RED ONION, DILL PICKLE, HOMEMADE BURGER SAUCE, TOASTED BRIOCHE BUN, LEVEL UP?, EXTRA TOPPINGS",
-    image: `${IMAGE_BASE}/Burgers/No.1.png`,
-    _localOrder: 0,
-  },
-];
-
-/* =========================================================
    DOM
    ========================================================= */
 const yearEl = document.getElementById("year");
@@ -325,14 +309,7 @@ const menuStatus = document.getElementById("menuStatus");
 const catBar = document.getElementById("catBar");
 const menuSections = document.getElementById("menuSections");
 
-/* Item modal */
-const menuModal = document.getElementById("menuModal");
-const modalTitle = document.getElementById("modalTitle");
-const modalCategory = document.getElementById("modalCategory");
-const modalPrice = document.getElementById("modalPrice");
-const modalLines = document.getElementById("modalLines");
-
-/* hero slider */
+// Optional hero slider (safe if not present)
 const heroImg = document.getElementById("heroImg");
 const heroPrev = document.getElementById("heroPrev");
 const heroNext = document.getElementById("heroNext");
@@ -366,10 +343,9 @@ function stripHtml(html) {
 }
 
 function hasImage(item) {
-  return Boolean(item?.image && String(item.image).trim().length > 0);
+  return Boolean(item.image && String(item.image).trim().length > 0);
 }
 
-/* Featured = items with png image */
 function hasPngImage(item) {
   const src = String(item?.image || "").trim();
   if (!src) return false;
@@ -377,13 +353,20 @@ function hasPngImage(item) {
   return clean.endsWith(".png");
 }
 
-/* Open selected branch page */
-function openBranchSite(branch) {
-  if (!branch?.orderUrl) return;
-  window.open(branch.orderUrl, "_blank", "noopener,noreferrer");
+/* =========================================================
+   Branch redirect (Option A)
+   ========================================================= */
+function goToBranch(branch) {
+  if (!branch || !branch.orderUrl) return;
+  // SAME TAB redirect (as requested)
+  window.location.href = branch.orderUrl;
+  // If you ever want new tab instead:
+  // window.open(branch.orderUrl, "_blank", "noopener,noreferrer");
 }
 
-/* Haversine distance (km) */
+/* =========================================================
+   Geo helpers
+   ========================================================= */
 function haversineKm(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const toRad = (d) => (d * Math.PI) / 180;
@@ -416,11 +399,18 @@ function findClosestBranch(userLat, userLon) {
    ========================================================= */
 function renderSelectOptions() {
   if (!branchSelect) return;
+  branchSelect.innerHTML = `<option value="">Select a branch…</option>`;
   BRANCHES.forEach((b) => {
     const opt = document.createElement("option");
     opt.value = b.id;
     opt.textContent = b.name;
     branchSelect.appendChild(opt);
+  });
+}
+
+function highlightSelected(branchId) {
+  document.querySelectorAll(".store").forEach((card) => {
+    card.classList.toggle("is-selected", card.dataset.id === branchId);
   });
 }
 
@@ -441,22 +431,23 @@ function createStoreCard(branch) {
     </div>
   `;
 
-  const selectBtn = card.querySelector("button");
-  selectBtn.addEventListener("click", () => {
+  const go = () => {
     if (branchSelect) branchSelect.value = branch.id;
-    setSelectedBranch(branch, { panMap: true, openPopup: true });
-    // Option A behavior: select -> open branch
-    openBranchSite(branch);
+    highlightSelected(branch.id);
+    goToBranch(branch); // Option A redirect
+  };
+
+  const selectBtn = card.querySelector("button");
+  selectBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    go();
   });
 
   card.addEventListener("click", (e) => {
-    const tag = e.target.tagName.toLowerCase();
+    const tag = e.target?.tagName?.toLowerCase();
     if (tag === "a" || tag === "button") return;
-
-    if (branchSelect) branchSelect.value = branch.id;
-    setSelectedBranch(branch, { panMap: true, openPopup: true });
-    // Option A behavior: click card -> open branch
-    openBranchSite(branch);
+    go();
   });
 
   return card;
@@ -467,25 +458,6 @@ function renderStoreGrid(list) {
   storeGrid.innerHTML = "";
   list.forEach((b) => storeGrid.appendChild(createStoreCard(b)));
   highlightSelected(branchSelect?.value || null);
-}
-
-function highlightSelected(branchId) {
-  document.querySelectorAll(".store").forEach((card) => {
-    card.classList.toggle("is-selected", card.dataset.id === branchId);
-  });
-}
-
-function setSelectedBranch(branch, opts = { panMap: false, openPopup: false }) {
-  if (!branch) {
-    highlightSelected(null);
-    if (opts.panMap) panMapToAllBranches();
-    return;
-  }
-
-  highlightSelected(branch.id);
-
-  if (opts.panMap) panMapToBranch(branch.id);
-  if (opts.openPopup) openBranchPopup(branch.id);
 }
 
 /* =========================================================
@@ -547,8 +519,7 @@ function initBranchMap() {
 
     marker.on("click", () => {
       if (branchSelect) branchSelect.value = b.id;
-      setSelectedBranch(b, { panMap: false, openPopup: true });
-      // Keep map click as select-only (popup already open)
+      highlightSelected(b.id);
     });
 
     branchMarkersById.set(b.id, marker);
@@ -559,6 +530,7 @@ function initBranchMap() {
     branchMap.fitBounds(bounds.pad(0.2));
   }
 
+  // Popup "Select" button handler → Option A redirect
   branchMap.on("popupopen", (e) => {
     const node = e.popup.getElement();
     if (!node) return;
@@ -570,42 +542,12 @@ function initBranchMap() {
       const b = BRANCHES.find((x) => x.id === id);
       if (!b) return;
       if (branchSelect) branchSelect.value = b.id;
-      setSelectedBranch(b, { panMap: true, openPopup: true });
-
-      // Option A behavior: selecting from map popup opens branch
-      openBranchSite(b);
+      highlightSelected(b.id);
+      goToBranch(b);
     });
   });
 }
 
-function panMapToAllBranches() {
-  if (!branchMap) return;
-  const points = BRANCHES
-    .filter((b) => Number.isFinite(b.lat) && Number.isFinite(b.lon))
-    .map((b) => [b.lat, b.lon]);
-  if (!points.length) return;
-  const bounds = L.latLngBounds(points);
-  branchMap.fitBounds(bounds.pad(0.2));
-}
-
-function panMapToBranch(branchId) {
-  if (!branchMap) return;
-  const marker = branchMarkersById.get(branchId);
-  if (!marker) return;
-  const latlng = marker.getLatLng();
-  branchMap.setView(latlng, Math.max(branchMap.getZoom(), 13), { animate: true });
-}
-
-function openBranchPopup(branchId) {
-  if (!branchMap) return;
-  const marker = branchMarkersById.get(branchId);
-  if (!marker) return;
-  marker.openPopup();
-}
-
-/* =========================================================
-   Geo button
-   ========================================================= */
 geoBtn?.addEventListener("click", () => {
   if (geoHint) geoHint.textContent = "Requesting location…";
 
@@ -637,13 +579,13 @@ geoBtn?.addEventListener("click", () => {
         return;
       }
 
-      if (branchSelect) branchSelect.value = branch.id;
-      setSelectedBranch(branch, { panMap: true, openPopup: true });
       if (geoHint)
         geoHint.textContent = `Closest branch: ${branch.town} (${distanceKm.toFixed(1)} km).`;
 
-      // Option A behavior: using location -> open branch
-      openBranchSite(branch);
+      // Option A: choose closest and redirect
+      if (branchSelect) branchSelect.value = branch.id;
+      highlightSelected(branch.id);
+      goToBranch(branch);
     },
     (err) => {
       if (!geoHint) return;
@@ -654,29 +596,27 @@ geoBtn?.addEventListener("click", () => {
   );
 });
 
-/* =========================================================
-   ✅ OPTION A: Dropdown selection opens branch immediately
-   ========================================================= */
+// Dropdown change → redirect (Option A)
 branchSelect?.addEventListener("change", () => {
   const id = branchSelect.value;
+  if (!id) return;
   const branch = BRANCHES.find((b) => b.id === id) || null;
-  if (geoHint) geoHint.textContent = "";
-  setSelectedBranch(branch, { panMap: true, openPopup: true });
-
-  if (branch?.orderUrl) {
-    openBranchSite(branch);
-  }
+  if (!branch) return;
+  highlightSelected(branch.id);
+  goToBranch(branch);
 });
 
 clearBranch?.addEventListener("click", () => {
   if (branchSelect) branchSelect.value = "";
   if (geoHint) geoHint.textContent = "";
-  setSelectedBranch(null, { panMap: true, openPopup: false });
+  highlightSelected(null);
 });
 
 /* =========================================================
    MENU: API mapping
    ========================================================= */
+let MENU = [];
+
 function toPriceNumberFromStoreApi(p) {
   try {
     const minorUnit = Number(p?.prices?.currency_minor_unit ?? 2);
@@ -724,6 +664,7 @@ async function loadMenuFromProxy() {
     const nameRaw = String(p?.name ?? "Item");
     const name = nameRaw.toUpperCase();
 
+    // local match + fallback so PNGs don’t disappear
     const localMatch = resolveLocalImage(category, nameRaw);
     const localImg = localMatch?.src || "";
 
@@ -743,9 +684,8 @@ async function loadMenuFromProxy() {
 }
 
 /* =========================================================
-    category bar + sections
+   Menu rendering + category bar
    ========================================================= */
-// Match VS Code folder order
 const CATEGORY_ORDER = ["Burgers", "Loaded Fries", "Sauces", "Shakes", "Sides", "Wings", "Specials"];
 
 function normalizeCat(c) {
@@ -778,6 +718,7 @@ function splitToLines(item) {
     .split(/\n|,/)
     .map((s) => s.trim())
     .filter(Boolean);
+
   if (parts.length <= 1) return [raw.toUpperCase()];
   return parts.map((x) => x.toUpperCase());
 }
@@ -863,7 +804,6 @@ function renderMenuSections() {
     items.forEach((item) => {
       const row = document.createElement("article");
       row.className = "menuItem";
-      row.tabIndex = 0;
 
       const img = hasImage(item)
         ? `<img class="menuItem__img" src="${item.image}" alt="${escapeHtml(
@@ -887,16 +827,6 @@ function renderMenuSections() {
         </div>
       `;
 
-      const open = () => openMenuModal(item);
-
-      row.addEventListener("click", open);
-      row.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          open();
-        }
-      });
-
       section.appendChild(row);
     });
 
@@ -907,46 +837,30 @@ function renderMenuSections() {
 }
 
 /* =========================================================
-   Modal
+   API FAILBACK: show backup PNG menu image
    ========================================================= */
-function openMenuModal(item) {
-  if (!menuModal) return;
+function showBackupMenuImage() {
+  if (menuStatus) menuStatus.textContent = "Showing backup menu image (API unavailable).";
+  if (catBar) catBar.innerHTML = "";
+  if (!menuSections) return;
 
-  if (modalTitle) modalTitle.textContent = item.name;
-  if (modalCategory) modalCategory.textContent = (item.category || "Menu").toUpperCase();
-  if (modalPrice) modalPrice.textContent = moneyGBP(item.price);
-
-  if (modalLines) {
-    modalLines.innerHTML = "";
-    splitToLines(item)
-      .slice(0, 24)
-      .forEach((l) => {
-        const div = document.createElement("div");
-        div.className = "line";
-        div.textContent = l;
-        modalLines.appendChild(div);
-      });
-  }
-
-  menuModal.classList.add("is-open");
-  menuModal.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
+  menuSections.innerHTML = `
+    <section class="menuSection" id="cat-backup">
+      <div class="menuSection__head">MENU</div>
+      <div class="status" style="margin:12px 0 18px;">
+        Live menu is unavailable right now. Here’s our backup menu:
+      </div>
+      <div style="width:100%;display:flex;justify-content:center;">
+        <img
+          src="${BACKUP_MENU_IMAGE}"
+          alt="Burger 8 menu"
+          style="max-width:980px;width:100%;height:auto;border-radius:16px;border:1px solid rgba(0,0,0,.10);"
+          loading="lazy"
+        />
+      </div>
+    </section>
+  `;
 }
-
-function closeMenuModal() {
-  if (!menuModal) return;
-  menuModal.classList.remove("is-open");
-  menuModal.setAttribute("aria-hidden", "true");
-  document.body.style.overflow = "";
-}
-
-menuModal?.addEventListener("click", (e) => {
-  const close = e.target?.dataset?.close === "1";
-  if (close) closeMenuModal();
-});
-window.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && menuModal?.classList.contains("is-open")) closeMenuModal();
-});
 
 /* =========================================================
    Active category highlighting
@@ -985,7 +899,7 @@ function setupActiveCategoryObserver() {
 }
 
 /* =========================================================
-   Hero slider
+   Hero slider (optional)
    ========================================================= */
 const HERO_IMAGES = [
   "assets/mae-mu-I7A_pHLcQK8-unsplash.jpg",
@@ -1017,7 +931,6 @@ heroNext?.addEventListener("click", () => heroStep(1));
 (function init() {
   renderSelectOptions();
   renderStoreGrid(BRANCHES);
-  setSelectedBranch(null);
 
   initBranchMap();
   renderHero();
@@ -1025,8 +938,7 @@ heroNext?.addEventListener("click", () => heroStep(1));
   loadMenuFromProxy()
     .then(() => renderMenuSections())
     .catch((err) => {
-      console.warn("Menu load failed, using fallback MENU:", err);
-      if (menuStatus) menuStatus.textContent = "Menu unavailable right now. (Fallback loaded.)";
-      renderMenuSections();
+      console.warn("Menu load failed:", err);
+      showBackupMenuImage(); // PNG backup
     });
 })();

@@ -7,106 +7,112 @@
 
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- Leaflet (OpenStreetMap) -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-  />
+  <!-- Leaflet (FIXED: no integrity attributes) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 
 <body>
-  <header class="topbar" role="banner">
+  <header class="topbar">
     <div class="topbar__inner">
-      <div class="topbar__left">
-        <a class="social" href="#" aria-label="Instagram">Instagram</a>
-        <a class="social" href="#" aria-label="Facebook">Facebook</a>
+      <div class="brand">
+        <img class="brand__logo" src="assets/burger_8_logo.png" alt="Burger 8 logo" />
+        <div class="brand__text">
+          <div class="brand__name">BURGER 8</div>
+          <div class="brand__tag">Always Fresh</div>
+        </div>
       </div>
 
-      <a class="logo" href="#top" aria-label="Burger 8 home">
-        <img src="assets/burger_8_logo.png" alt="Burger 8 logo" />
-      </a>
-
-      <!-- ORDER/CART removed -->
-      <div class="topbar__right"></div>
+      <nav class="topbar__nav">
+        <a class="navLink" href="#menu">Menu</a>
+        <a class="navLink" href="#locations">Locations</a>
+      </nav>
     </div>
   </header>
 
-  <section id="top" class="hero" aria-label="Hero images">
-    <div class="hero__frame">
-      <img id="heroImg" class="hero__img" src="assets/mae-mu-I7A_pHLcQK8-unsplash.jpg" alt="Burger 8 hero" />
-      <div class="hero__pager"><span id="heroIndex">1</span>/<span id="heroTotal">6</span></div>
-      <button id="heroPrev" class="hero__nav hero__nav--left" type="button" aria-label="Previous image">‹</button>
-      <button id="heroNext" class="hero__nav hero__nav--right" type="button" aria-label="Next image">›</button>
-    </div>
-  </section>
-
-  <section class="menuShell" aria-label="Menu">
-    <div class="menuShell__title">MENU</div>
-    <nav id="catBar" class="catBar" aria-label="Menu categories"></nav>
-
-    <div class="menuShell__content">
-      <p id="menuStatus" class="status"></p>
-      <div id="menuSections" class="menuSections"></div>
-    </div>
-  </section>
-
-  <section id="locations" class="locations" aria-label="Locations">
-    <div class="locations__inner">
-      <h2 class="locations__title">LOCATIONS</h2>
-      <p class="locations__hint">Select a branch to view it on the map.</p>
-
-      <div class="locations__controls">
-        <select id="branchSelect" class="select">
-          <option value="">— Select a branch —</option>
-        </select>
-
-        <button id="geoBtn" class="btnGhost" type="button">Use my location</button>
-        <button id="clearBranch" class="btnGhost" type="button">Clear</button>
-      </div>
-
-      <p id="geoHint" class="status"></p>
-
-      <div id="storeGrid" class="storeGrid"></div>
-
-      <div class="mapBlock" aria-label="Branch map">
-        <div class="mapBlock__head">
-          <div class="mapBlock__title">BRANCH MAP</div>
-          <div class="mapBlock__sub">Tap a marker to select a branch.</div>
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero__wrap">
+        <div class="hero__imgWrap">
+          <img id="heroImg" class="hero__img" src="assets/mae-mu-I7A_pHLcQK8-unsplash.jpg" alt="Burger hero" />
         </div>
-        <div id="branchMap" class="branchMap" role="application" aria-label="Map showing branch locations"></div>
+        <div class="hero__controls">
+          <button id="heroPrev" class="heroBtn" type="button" aria-label="Previous image">‹</button>
+          <div class="hero__counter"><span id="heroIndex">1</span>/<span id="heroTotal">1</span></div>
+          <button id="heroNext" class="heroBtn" type="button" aria-label="Next image">›</button>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Item modal (kept, but no add-to-cart action) -->
-  <div id="menuModal" class="modal" aria-hidden="true">
-    <div class="modal__backdrop" data-close="1"></div>
-    <div class="modal__card" role="dialog" aria-modal="true" aria-label="Menu item details">
-      <button class="modal__close" type="button" data-close="1" aria-label="Close">×</button>
-
-      <div class="modal__meta">
-        <div class="modal__cat" id="modalCategory">Menu</div>
-        <div class="modal__price" id="modalPrice">£—</div>
+    <!-- MENU -->
+    <section id="menu" class="section">
+      <div class="section__head">
+        <h2 class="section__title">Menu</h2>
+        <div id="menuStatus" class="status"></div>
       </div>
 
-      <h3 class="modal__title" id="modalTitle">Item</h3>
-      <div id="modalLines" class="modal__lines"></div>
-    </div>
-  </div>
+      <!-- category bar -->
+      <div id="catBar" class="catBar"></div>
+
+      <!-- API menu goes here -->
+      <div id="menuSections" class="menu"></div>
+
+      <!-- PNG backup menu (shown only if API fails) -->
+      <div id="backupMenu" class="backupMenu" hidden>
+        <div class="backupMenu__head">
+          <div class="backupMenu__title">Menu (Backup)</div>
+          <div class="backupMenu__hint">Live menu unavailable — showing backup image.</div>
+        </div>
+        <img
+          class="backupMenu__img"
+          src="assets/burger8_menu_converted.png"
+          alt="Burger 8 backup menu"
+          loading="lazy"
+        />
+      </div>
+    </section>
+
+    <!-- LOCATIONS -->
+    <section id="locations" class="section">
+      <div class="section__head">
+        <h2 class="section__title">Locations</h2>
+        <p class="section__sub">Select a branch to open its ordering page.</p>
+      </div>
+
+      <div class="controlsRow">
+        <label class="label">
+          Choose a branch
+          <select id="branchSelect" class="select">
+            <option value="">Select…</option>
+          </select>
+        </label>
+
+        <button id="goBranchBtn" class="primaryBtn" type="button" disabled>
+          Go to branch
+        </button>
+
+        <button id="geoBtn" class="ghostBtn" type="button">
+          Find closest
+        </button>
+
+        <div id="geoHint" class="hint"></div>
+      </div>
+
+      <div class="mapGrid">
+        <div id="storeGrid" class="storeGrid"></div>
+        <div class="mapCard">
+          <div id="branchMap" class="map"></div>
+        </div>
+      </div>
+    </section>
+  </main>
 
   <footer class="footer">
-    <span>© <span id="year"></span> Powered By BritEat</span>
+    <div>© <span id="year"></span> Burger 8</div>
   </footer>
 
-  <!-- Leaflet JS -->
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""
-  ></script>
-
+  <!-- Leaflet JS (FIXED: no integrity attributes) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
