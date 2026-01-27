@@ -147,7 +147,7 @@ const LOCAL_IMAGE_MAP = {
 };
 
 /* =========================================================
-   SMART IMAGE RESOLVER v2 (fuzzy + fallback so PNGs don't disappear)
+   SMART IMAGE RESOLVER v2
    ========================================================= */
 
 // Map API category names -> your folder names
@@ -216,7 +216,6 @@ function burgerNumberFromName(name) {
   return null;
 }
 
-// Simple token overlap score (0..1)
 function overlapScore(aTokens, bTokens) {
   if (!aTokens.size || !bTokens.size) return 0;
   let hit = 0;
@@ -224,7 +223,6 @@ function overlapScore(aTokens, bTokens) {
   return hit / Math.max(aTokens.size, bTokens.size);
 }
 
-// Pick best matching image in category (fuzzy)
 function bestMatchInCategory(category, itemName) {
   const list = LOCAL_LIST[category];
   if (!list || !list.length) return null;
@@ -232,15 +230,12 @@ function bestMatchInCategory(category, itemName) {
   const itemKey = normKey(itemName);
   const itemTokens = new Set(itemKey.split(" ").filter(Boolean));
 
-  // 1) Exact key match
   const exact = list.find((x) => x.key === itemKey);
   if (exact) return exact;
 
-  // 2) Contains match
   const contains = list.find((x) => itemKey.includes(x.key) || x.key.includes(itemKey));
   if (contains) return contains;
 
-  // 3) Token overlap (fuzzy)
   let best = null;
   let bestScore = 0;
   for (const cand of list) {
@@ -251,41 +246,32 @@ function bestMatchInCategory(category, itemName) {
     }
   }
 
-  // Require a small minimum so we don't randomly match
   if (best && bestScore >= 0.34) return best;
-
   return null;
 }
 
-// Fallback: pick next unused image in category (so PNGs never disappear)
 function nextUnusedInCategory(category) {
   const list = LOCAL_LIST[category];
   if (!list || !list.length) return null;
 
   const used = USED_LOCAL_INDEX[category] || new Set();
   const free = list.find((x) => !used.has(x.index));
-  return free || list[0]; // if all used, allow reuse
+  return free || list[0];
 }
 
-/**
- * Returns: {src, index} OR null
- * Strategy:
- * 1) Burgers: use number mapping -> No.X.png
- * 2) Fuzzy match by name to filename
- * 3) Fallback: next unused PNG in that folder (so images don't disappear)
- */
 function resolveLocalImage(categoryRaw, itemNameRaw) {
   const category = normalizeCategory(categoryRaw);
   const name = String(itemNameRaw || "");
 
-  // Burger special: map by number first (most reliable)
   if (category === "Burgers") {
     const num = burgerNumberFromName(name);
     if (num != null) {
       const targetKey1 = normKey(`No.${num}`);
       const targetKey2 = normKey(`No ${num}`);
       const list = LOCAL_LIST.Burgers || [];
-      const hit = list.find((x) => x.key === targetKey1) || list.find((x) => x.key === targetKey2);
+      const hit =
+        list.find((x) => x.key === targetKey1) ||
+        list.find((x) => x.key === targetKey2);
       if (hit) {
         USED_LOCAL_INDEX.Burgers.add(hit.index);
         return hit;
@@ -293,14 +279,12 @@ function resolveLocalImage(categoryRaw, itemNameRaw) {
     }
   }
 
-  // Try fuzzy match
   const matched = bestMatchInCategory(category, name);
   if (matched) {
     USED_LOCAL_INDEX[category]?.add(matched.index);
     return matched;
   }
 
-  // Fallback: assign some PNG from the same folder
   const fallback = nextUnusedInCategory(category);
   if (fallback) {
     USED_LOCAL_INDEX[category]?.add(fallback.index);
@@ -321,7 +305,6 @@ let MENU = [
     price: 10.6,
     description:
       "SERVED WITH SEASONED FRIES, 2 x SMASHED BEEF PATTIES, CHEESE, LETTUCE, RED ONION, DILL PICKLE, HOMEMADE BURGER SAUCE, TOASTED BRIOCHE BUN, LEVEL UP?, EXTRA TOPPINGS",
-    tags: ["BEEF"],
     image: `${IMAGE_BASE}/Burgers/No.1.png`,
     _localOrder: 0,
   },
@@ -330,7 +313,6 @@ let MENU = [
 /* =========================================================
    DOM
    ========================================================= */
-const orderBtn = document.getElementById("orderBtn");
 const yearEl = document.getElementById("year");
 
 const branchSelect = document.getElementById("branchSelect");
@@ -349,7 +331,6 @@ const modalTitle = document.getElementById("modalTitle");
 const modalCategory = document.getElementById("modalCategory");
 const modalPrice = document.getElementById("modalPrice");
 const modalLines = document.getElementById("modalLines");
-const modalAddToCart = document.getElementById("modalAddToCart");
 
 /* hero slider */
 const heroImg = document.getElementById("heroImg");
@@ -357,18 +338,6 @@ const heroPrev = document.getElementById("heroPrev");
 const heroNext = document.getElementById("heroNext");
 const heroIndex = document.getElementById("heroIndex");
 const heroTotal = document.getElementById("heroTotal");
-
-/* Cart DOM */
-const cartBtn = document.getElementById("cartBtn");
-const cartCount = document.getElementById("cartCount");
-const cartDrawer = document.getElementById("cartDrawer");
-const cartList = document.getElementById("cartList");
-const cartEmpty = document.getElementById("cartEmpty");
-const cartItemsCount = document.getElementById("cartItemsCount");
-const cartTotal = document.getElementById("cartTotal");
-const cartClear = document.getElementById("cartClear");
-const cartCheckout = document.getElementById("cartCheckout");
-const cartHint = document.getElementById("cartHint");
 
 /* =========================================================
    Helpers
@@ -397,7 +366,7 @@ function stripHtml(html) {
 }
 
 function hasImage(item) {
-  return Boolean(item.image && String(item.image).trim().length > 0);
+  return Boolean(item?.image && String(item.image).trim().length > 0);
 }
 
 /* Featured = items with png image */
@@ -408,19 +377,10 @@ function hasPngImage(item) {
   return clean.endsWith(".png");
 }
 
-function setOrderEnabled(enabled, url) {
-  if (!orderBtn) return;
-  if (enabled) {
-    orderBtn.setAttribute("aria-disabled", "false");
-    orderBtn.href = url;
-    orderBtn.target = "_blank";
-    orderBtn.rel = "noopener noreferrer";
-  } else {
-    orderBtn.setAttribute("aria-disabled", "true");
-    orderBtn.href = "#locations";
-    orderBtn.removeAttribute("target");
-    orderBtn.removeAttribute("rel");
-  }
+/* Open selected branch page */
+function openBranchSite(branch) {
+  if (!branch?.orderUrl) return;
+  window.open(branch.orderUrl, "_blank", "noopener,noreferrer");
 }
 
 /* Haversine distance (km) */
@@ -450,197 +410,6 @@ function findClosestBranch(userLat, userLon) {
   }
   return { branch: best, distanceKm: bestDist };
 }
-
-/* =========================================================
-   CART (pre-order)
-   ========================================================= */
-const CART_KEY = "burger8_cart_v1";
-let CART = []; // [{id,name,price,qty,category}]
-
-function loadCart() {
-  try {
-    const raw = localStorage.getItem(CART_KEY);
-    CART = raw ? JSON.parse(raw) : [];
-    if (!Array.isArray(CART)) CART = [];
-  } catch {
-    CART = [];
-  }
-}
-function saveCart() {
-  localStorage.setItem(CART_KEY, JSON.stringify(CART));
-}
-function cartCountTotal() {
-  return CART.reduce((s, it) => s + (it.qty || 0), 0);
-}
-function cartTotalPrice() {
-  return CART.reduce((s, it) => s + (Number(it.price) || 0) * (it.qty || 0), 0);
-}
-
-function openCart() {
-  if (!cartDrawer) return;
-  cartDrawer.classList.add("is-open");
-  cartDrawer.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
-}
-function closeCart() {
-  if (!cartDrawer) return;
-  cartDrawer.classList.remove("is-open");
-  cartDrawer.setAttribute("aria-hidden", "true");
-  document.body.style.overflow = "";
-}
-
-function renderCart() {
-  if (!cartList) return;
-
-  const count = cartCountTotal();
-  if (cartCount) cartCount.textContent = String(count);
-  if (cartItemsCount) cartItemsCount.textContent = String(count);
-  if (cartTotal) cartTotal.textContent = moneyGBP(cartTotalPrice());
-
-  if (cartHint) cartHint.textContent = "";
-
-  cartList.innerHTML = "";
-  const empty = CART.length === 0;
-  if (cartEmpty) cartEmpty.style.display = empty ? "block" : "none";
-  if (empty) return;
-
-  for (const item of CART) {
-    const row = document.createElement("div");
-    row.className = "cartItem";
-
-    row.innerHTML = `
-      <div>
-        <div class="cartItem__name">${escapeHtml(item.name)}</div>
-        <div class="cartItem__meta">${escapeHtml(item.category || "")} • ${moneyGBP(
-          Number(item.price) || 0
-        )}</div>
-      </div>
-      <div class="cartItem__right">
-        <div class="qty">
-          <button class="qtyBtn" type="button" data-act="dec" data-id="${escapeHtml(
-            item.id
-          )}">−</button>
-          <div class="qtyVal">${item.qty}</div>
-          <button class="qtyBtn" type="button" data-act="inc" data-id="${escapeHtml(
-            item.id
-          )}">+</button>
-        </div>
-        <button class="removeBtn" type="button" data-act="rm" data-id="${escapeHtml(
-          item.id
-        )}">Remove</button>
-      </div>
-    `;
-
-    cartList.appendChild(row);
-  }
-
-  cartList.querySelectorAll("button[data-act]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const act = btn.getAttribute("data-act");
-      const id = btn.getAttribute("data-id");
-      if (!id) return;
-
-      if (act === "inc") cartAdjust(id, +1);
-      if (act === "dec") cartAdjust(id, -1);
-      if (act === "rm") cartRemove(id);
-    });
-  });
-}
-
-function cartAdd(menuItem) {
-  if (!menuItem || !menuItem.id) return;
-  const id = String(menuItem.id);
-  const existing = CART.find((x) => x.id === id);
-  if (existing) existing.qty += 1;
-  else {
-    CART.push({
-      id,
-      name: String(menuItem.name || "Item"),
-      price: Number(menuItem.price) || 0,
-      qty: 1,
-      category: String(menuItem.category || "Menu"),
-    });
-  }
-  saveCart();
-  renderCart();
-}
-
-function cartAdjust(id, delta) {
-  const it = CART.find((x) => x.id === id);
-  if (!it) return;
-  it.qty += delta;
-  if (it.qty <= 0) CART = CART.filter((x) => x.id !== id);
-  saveCart();
-  renderCart();
-}
-
-function cartRemove(id) {
-  CART = CART.filter((x) => x.id !== id);
-  saveCart();
-  renderCart();
-}
-
-function cartClearAll() {
-  CART = [];
-  saveCart();
-  renderCart();
-}
-
-function buildOrderSummaryText(branch) {
-  const lines = [];
-  lines.push("Burger 8 — Order summary");
-  if (branch) lines.push(`Branch: ${branch.name}`);
-  lines.push("");
-
-  CART.forEach((it) => {
-    const itemTotal = (Number(it.price) || 0) * (it.qty || 0);
-    lines.push(`${it.qty} x ${it.name}  (${moneyGBP(itemTotal)})`);
-  });
-
-  lines.push("");
-  lines.push(`Total: ${moneyGBP(cartTotalPrice())}`);
-  return lines.join("\n");
-}
-
-/* Cart UI events */
-cartBtn?.addEventListener("click", () => {
-  openCart();
-  renderCart();
-});
-cartDrawer?.addEventListener("click", (e) => {
-  if (e.target?.dataset?.cartClose === "1") closeCart();
-});
-window.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && cartDrawer?.classList.contains("is-open")) closeCart();
-});
-cartClear?.addEventListener("click", () => cartClearAll());
-
-cartCheckout?.addEventListener("click", async () => {
-  if (CART.length === 0) {
-    if (cartHint) cartHint.textContent = "Add items to your cart first.";
-    return;
-  }
-
-  const branchId = branchSelect?.value || "";
-  const branch = BRANCHES.find((b) => b.id === branchId) || null;
-
-  if (!branch) {
-    if (cartHint) cartHint.textContent = "Select a branch before checkout.";
-    document.getElementById("locations")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    return;
-  }
-
-  const summary = buildOrderSummaryText(branch);
-
-  try {
-    await navigator.clipboard.writeText(summary);
-    if (cartHint) cartHint.textContent = "Order summary copied. Opening branch checkout…";
-  } catch {
-    if (cartHint) cartHint.textContent = "Opening branch checkout… (could not auto-copy)";
-  }
-
-  window.open(branch.orderUrl, "_blank", "noopener,noreferrer");
-});
 
 /* =========================================================
    Branch rendering
@@ -676,13 +445,18 @@ function createStoreCard(branch) {
   selectBtn.addEventListener("click", () => {
     if (branchSelect) branchSelect.value = branch.id;
     setSelectedBranch(branch, { panMap: true, openPopup: true });
+    // Option A behavior: select -> open branch
+    openBranchSite(branch);
   });
 
   card.addEventListener("click", (e) => {
     const tag = e.target.tagName.toLowerCase();
     if (tag === "a" || tag === "button") return;
+
     if (branchSelect) branchSelect.value = branch.id;
     setSelectedBranch(branch, { panMap: true, openPopup: true });
+    // Option A behavior: click card -> open branch
+    openBranchSite(branch);
   });
 
   return card;
@@ -703,13 +477,11 @@ function highlightSelected(branchId) {
 
 function setSelectedBranch(branch, opts = { panMap: false, openPopup: false }) {
   if (!branch) {
-    setOrderEnabled(false, "#locations");
     highlightSelected(null);
     if (opts.panMap) panMapToAllBranches();
     return;
   }
 
-  setOrderEnabled(true, branch.orderUrl);
   highlightSelected(branch.id);
 
   if (opts.panMap) panMapToBranch(branch.id);
@@ -776,6 +548,7 @@ function initBranchMap() {
     marker.on("click", () => {
       if (branchSelect) branchSelect.value = b.id;
       setSelectedBranch(b, { panMap: false, openPopup: true });
+      // Keep map click as select-only (popup already open)
     });
 
     branchMarkersById.set(b.id, marker);
@@ -798,6 +571,9 @@ function initBranchMap() {
       if (!b) return;
       if (branchSelect) branchSelect.value = b.id;
       setSelectedBranch(b, { panMap: true, openPopup: true });
+
+      // Option A behavior: selecting from map popup opens branch
+      openBranchSite(b);
     });
   });
 }
@@ -863,9 +639,11 @@ geoBtn?.addEventListener("click", () => {
 
       if (branchSelect) branchSelect.value = branch.id;
       setSelectedBranch(branch, { panMap: true, openPopup: true });
-      if (geoHint) geoHint.textContent = `Closest branch: ${branch.town} (${distanceKm.toFixed(
-        1
-      )} km).`;
+      if (geoHint)
+        geoHint.textContent = `Closest branch: ${branch.town} (${distanceKm.toFixed(1)} km).`;
+
+      // Option A behavior: using location -> open branch
+      openBranchSite(branch);
     },
     (err) => {
       if (!geoHint) return;
@@ -876,11 +654,18 @@ geoBtn?.addEventListener("click", () => {
   );
 });
 
+/* =========================================================
+   ✅ OPTION A: Dropdown selection opens branch immediately
+   ========================================================= */
 branchSelect?.addEventListener("change", () => {
   const id = branchSelect.value;
   const branch = BRANCHES.find((b) => b.id === id) || null;
   if (geoHint) geoHint.textContent = "";
   setSelectedBranch(branch, { panMap: true, openPopup: true });
+
+  if (branch?.orderUrl) {
+    openBranchSite(branch);
+  }
 });
 
 clearBranch?.addEventListener("click", () => {
@@ -939,7 +724,6 @@ async function loadMenuFromProxy() {
     const nameRaw = String(p?.name ?? "Item");
     const name = nameRaw.toUpperCase();
 
-    //  SMART local match (by name) + fallback so PNGs don't disappear
     const localMatch = resolveLocalImage(category, nameRaw);
     const localImg = localMatch?.src || "";
 
@@ -1024,7 +808,6 @@ function getLocalOrderVal(x) {
   return Number.isFinite(x?._localOrder) ? x._localOrder : 9999;
 }
 
-// Featured order: Burgers first, then Fries, then rest by folder order
 function featuredCategoryRank(cat) {
   const order = ["Burgers", "Loaded Fries", "Sauces", "Shakes", "Sides", "Wings", "Specials"];
   const idx = order.indexOf(cat);
@@ -1101,34 +884,17 @@ function renderMenuSections() {
             <div class="menuItem__price">${moneyGBP(item.price)}</div>
           </div>
           <div class="menuItem__lines">${lines}</div>
-          <div class="menuItem__row">
-            <button class="addBtn" type="button">ADD</button>
-            <a class="smallLink" href="#" onclick="return false;">ALLERGENS</a>
-          </div>
         </div>
       `;
 
       const open = () => openMenuModal(item);
 
-      row.addEventListener("click", (e) => {
-        const tag = e.target.tagName.toLowerCase();
-        if (tag === "a" || tag === "button") return;
-        open();
-      });
-
+      row.addEventListener("click", open);
       row.addEventListener("keydown", (e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           open();
         }
-      });
-
-      const addBtn = row.querySelector("button.addBtn");
-      addBtn?.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        cartAdd(item);
-        openCart();
       });
 
       section.appendChild(row);
@@ -1162,14 +928,6 @@ function openMenuModal(item) {
       });
   }
 
-  if (modalAddToCart) {
-    modalAddToCart.onclick = () => {
-      cartAdd(item);
-      closeMenuModal();
-      openCart();
-    };
-  }
-
   menuModal.classList.add("is-open");
   menuModal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
@@ -1198,7 +956,9 @@ let catObserver = null;
 function setupActiveCategoryObserver() {
   if (catObserver) catObserver.disconnect();
 
-  const catIds = getCategoriesOrdered().map((cat) => `cat-${cat.toLowerCase().replace(/\s+/g, "-")}`);
+  const catIds = getCategoriesOrdered().map(
+    (cat) => `cat-${cat.toLowerCase().replace(/\s+/g, "-")}`
+  );
   const els = catIds.map((id) => document.getElementById(id)).filter(Boolean);
   if (!els.length) return;
 
@@ -1255,9 +1015,6 @@ heroNext?.addEventListener("click", () => heroStep(1));
    INIT
    ========================================================= */
 (function init() {
-  loadCart();
-  renderCart();
-
   renderSelectOptions();
   renderStoreGrid(BRANCHES);
   setSelectedBranch(null);
