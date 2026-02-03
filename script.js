@@ -1,100 +1,39 @@
 /* =========================================================
-   Burger 8 — script.js (Menu + Branch redirect + Map + API menu with PNG backup)
-   Option A: user selects a branch → redirect to branch order page
-   If menu API fails → show backup PNG menu image
-   ========================================================= */
+   Burger 8 — script.js (FULL)
+   Fixes:
+   - Upsell modal cannot get stuck
+   - [hidden] enforced in CSS
+   - Close works: X / backdrop / ESC / Skip / Continue
+========================================================= */
 
-/* =========================================================
-   BRANCHES
-   ========================================================= */
+/* ===================== BRANCHES ===================== */
 const BRANCHES = [
-  {
-    id: "hartlepool",
-    name: "Burger 8 — Hartlepool",
-    town: "Hartlepool",
-    postcode: "",
-    lat: 54.70705484704487,
-    lon: -1.2214848646442373,
-    orderUrl: "https://burger8hartlepool.briteat.co.uk/",
-    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Hartlepool",
-  },
-  {
-    id: "benton",
-    name: "Burger 8 — Benton",
-    town: "Benton",
-    postcode: "",
-    lat: 55.007947172166844,
-    lon: -1.5782965020026007,
-    orderUrl: "https://burger8benton.briteat.co.uk/",
-    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Benton",
-  },
-  {
-    id: "easington",
-    name: "Burger 8 — Easington",
-    town: "Easington",
-    postcode: "",
-    lat: 54.78825128410204,
-    lon: -1.3255925253066914,
-    orderUrl: "https://burger8easington.briteat.co.uk/",
-    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Easington",
-  },
-  {
-    id: "ashington",
-    name: "Burger 8 — Ashington",
-    town: "Ashington",
-    postcode: "",
-    lat: 55.183361786072375,
-    lon: -1.571623667610947,
-    orderUrl: "https://burger8ashington.briteat.co.uk/",
-    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Ashington",
-  },
-  {
-    id: "birtley",
-    name: "Burger 8 — Birtley",
-    town: "Birtley",
-    postcode: "",
-    lat: 54.89415511371937,
-    lon: -1.5768603081097352,
-    orderUrl: "https://burger8birtley.briteat.co.uk/",
-    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Birtley",
-  },
-  {
-    id: "blyth",
-    name: "Burger 8 — Blyth",
-    town: "Blyth",
-    postcode: "",
-    lat: 55.126359423544635,
-    lon: -1.510574867614533,
-    orderUrl: "https://burger8blyth.briteat.co.uk/",
-    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Blyth",
-  },
-  {
-    id: "bedlington",
-    name: "Burger 8 — Bedlington",
-    town: "Bedlington",
-    postcode: "",
-    lat: 55.140780449160076,
-    lon: -1.5668576467265456,
-    orderUrl: "https://burger8bedlington.briteat.co.uk/",
-    mapsUrl: "https://www.google.com/maps?q=Burger%208%20Bedlington",
-  },
+  { id:"hartlepool", name:"Burger 8 — Hartlepool", town:"Hartlepool", lat:54.70705484704487, lon:-1.2214848646442373, orderUrl:"https://burger8hartlepool.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Hartlepool" },
+  { id:"benton", name:"Burger 8 — Benton", town:"Benton", lat:55.007947172166844, lon:-1.5782965020026007, orderUrl:"https://burger8benton.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Benton" },
+  { id:"easington", name:"Burger 8 — Easington", town:"Easington", lat:54.78825128410204, lon:-1.3255925253066914, orderUrl:"https://burger8easington.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Easington" },
+  { id:"ashington", name:"Burger 8 — Ashington", town:"Ashington", lat:55.183361786072375, lon:-1.571623667610947, orderUrl:"https://burger8ashington.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Ashington" },
+  { id:"birtley", name:"Burger 8 — Birtley", town:"Birtley", lat:54.89415511371937, lon:-1.5768603081097352, orderUrl:"https://burger8birtley.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Birtley" },
+  { id:"blyth", name:"Burger 8 — Blyth", town:"Blyth", lat:55.126359423544635, lon:-1.510574867614533, orderUrl:"https://burger8blyth.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Blyth" },
+  { id:"bedlington", name:"Burger 8 — Bedlington", town:"Bedlington", lat:55.140780449160076, lon:-1.5668576467265456, orderUrl:"https://burger8bedlington.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Bedlington" },
 ];
 
-/* =========================================================
-   MENU: proxy + backup PNG
-   ========================================================= */
-const MENU_PROXY_ENDPOINT =
-  "https://burger8-menu-proxy.parsazahedi78.workers.dev/menu";
-
-// Backup image to show if API menu fails:
+const MENU_PROXY_ENDPOINT = "https://burger8-menu-proxy.parsazahedi78.workers.dev/menu";
 const BACKUP_MENU_IMAGE = "assets/burger8_menu_converted.png";
 
-/* =========================================================
-   LOCAL MENU IMAGES (ALL PNGs)
-   (Used to attach local PNGs to API items where possible)
-   ========================================================= */
-const IMAGE_BASE = "assets/PNG-20260116T144520Z-3-001/PNG";
+/* Only these categories, in this order */
+const REQUIRED_CATEGORY_ORDER = [
+  "Monthly Special",
+  "Burgers",
+  "Loaded Fries",
+  "Wings",
+  "Milkshakes",
+  "Sides",
+  "Drinks",
+  "Sauces",
+];
 
+/* ===================== LOCAL PNGS ===================== */
+const IMAGE_BASE = "assets/PNG-20260116T144520Z-3-001/PNG";
 const LOCAL_IMAGE_MAP = {
   Burgers: [
     `${IMAGE_BASE}/Burgers/No.8.png`,
@@ -150,24 +89,24 @@ const LOCAL_IMAGE_MAP = {
   ],
 };
 
-/* =========================================================
-   SMART IMAGE RESOLVER (fuzzy + fallback)
-   ========================================================= */
 const CATEGORY_ALIAS = {
   Milkshakes: "Shakes",
   "Milk Shakes": "Shakes",
   Shake: "Shakes",
-  "Loaded fries": "Loaded Fries",
-  "Loaded Fries ": "Loaded Fries",
   Sauce: "Sauces",
   "Burger Sauces": "Sauces",
   Side: "Sides",
-  "Wings ": "Wings",
 };
 
 function normalizeCategory(cat) {
   const c = String(cat || "").trim();
   return CATEGORY_ALIAS[c] || c;
+}
+
+function fileBase(path) {
+  const p = String(path || "");
+  const just = p.split("/").pop() || p;
+  return just.replace(/\.[^.]+$/, "");
 }
 
 function normKey(s) {
@@ -180,13 +119,28 @@ function normKey(s) {
     .replace(/\s+/g, " ");
 }
 
-function fileBase(path) {
-  const p = String(path || "");
-  const just = p.split("/").pop() || p;
-  return just.replace(/\.[^.]+$/, "");
+function stripHtml(html) {
+  if (!html) return "";
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html;
+  return (tmp.textContent || tmp.innerText || "").trim();
 }
 
-// category -> [{src, key, index, tokens}]
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function moneyGBP(n) {
+  if (typeof n !== "number" || Number.isNaN(n)) return "£—";
+  return `£${n.toFixed(2)}`;
+}
+
+/* Build searchable local list */
 const LOCAL_LIST = (() => {
   const out = {};
   for (const [cat, arr] of Object.entries(LOCAL_IMAGE_MAP)) {
@@ -200,7 +154,6 @@ const LOCAL_LIST = (() => {
   return out;
 })();
 
-// Track used images per category so fallback assigns next unused one
 const USED_LOCAL_INDEX = (() => {
   const out = {};
   for (const cat of Object.keys(LOCAL_IMAGE_MAP)) out[cat] = new Set();
@@ -294,112 +247,35 @@ function resolveLocalImage(categoryRaw, itemNameRaw) {
   return null;
 }
 
-/* =========================================================
-   DOM
-   ========================================================= */
+/* ===================== DOM ===================== */
 const yearEl = document.getElementById("year");
-
 const branchSelect = document.getElementById("branchSelect");
-const storeGrid = document.getElementById("storeGrid");
-const geoBtn = document.getElementById("geoBtn");
 const geoHint = document.getElementById("geoHint");
-const clearBranch = document.getElementById("clearBranch");
 
 const menuStatus = document.getElementById("menuStatus");
 const catBar = document.getElementById("catBar");
 const menuSections = document.getElementById("menuSections");
+const backupMenu = document.getElementById("backupMenu");
 
-// Optional hero slider (safe if not present)
-const heroImg = document.getElementById("heroImg");
-const heroPrev = document.getElementById("heroPrev");
-const heroNext = document.getElementById("heroNext");
-const heroIndex = document.getElementById("heroIndex");
-const heroTotal = document.getElementById("heroTotal");
+const orderNowBtn = document.getElementById("orderNowBtn");
 
-/* =========================================================
-   Helpers
-   ========================================================= */
+// Modal DOM
+const upsellBackdrop = document.getElementById("upsellBackdrop");
+const upsellModal = document.getElementById("upsellModal");
+const upsellClose = document.getElementById("upsellClose");
+const upsellSkip = document.getElementById("upsellSkip");
+const upsellGoOrder = document.getElementById("upsellGoOrder");
+const upsellOptionsRoot = document.getElementById("upsellOptions");
+const upsellForItem = document.getElementById("upsellForItem");
+
 if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-function escapeHtml(str) {
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
+/* ===================== Branch selection ===================== */
+let selectedBranchId = "";
 
-function moneyGBP(n) {
-  if (typeof n !== "number" || Number.isNaN(n)) return "£—";
-  return `£${n.toFixed(2)}`;
-}
-
-function stripHtml(html) {
-  if (!html) return "";
-  const tmp = document.createElement("div");
-  tmp.innerHTML = html;
-  return (tmp.textContent || tmp.innerText || "").trim();
-}
-
-function hasImage(item) {
-  return Boolean(item.image && String(item.image).trim().length > 0);
-}
-
-function hasPngImage(item) {
-  const src = String(item?.image || "").trim();
-  if (!src) return false;
-  const clean = src.split("?")[0].toLowerCase();
-  return clean.endsWith(".png");
-}
-
-/* =========================================================
-   Branch redirect (Option A)
-   ========================================================= */
-function goToBranch(branch) {
-  if (!branch || !branch.orderUrl) return;
-  // SAME TAB redirect (as requested)
-  window.location.href = branch.orderUrl;
-  // If you ever want new tab instead:
-  // window.open(branch.orderUrl, "_blank", "noopener,noreferrer");
-}
-
-/* =========================================================
-   Geo helpers
-   ========================================================= */
-function haversineKm(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-  const toRad = (d) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(a));
-}
-
-function findClosestBranch(userLat, userLon) {
-  let best = null;
-  let bestDist = Infinity;
-  for (const b of BRANCHES) {
-    if (!Number.isFinite(b.lat) || !Number.isFinite(b.lon)) continue;
-    const d = haversineKm(userLat, userLon, b.lat, b.lon);
-    if (d < bestDist) {
-      bestDist = d;
-      best = b;
-    }
-  }
-  return { branch: best, distanceKm: bestDist };
-}
-
-/* =========================================================
-   Branch rendering
-   ========================================================= */
 function renderSelectOptions() {
   if (!branchSelect) return;
-  branchSelect.innerHTML = `<option value="">Select a branch…</option>`;
+  branchSelect.innerHTML = `<option value="">Select…</option>`;
   BRANCHES.forEach((b) => {
     const opt = document.createElement("option");
     opt.value = b.id;
@@ -408,64 +284,44 @@ function renderSelectOptions() {
   });
 }
 
-function highlightSelected(branchId) {
-  document.querySelectorAll(".store").forEach((card) => {
-    card.classList.toggle("is-selected", card.dataset.id === branchId);
-  });
+function setSelectedBranch(id) {
+  selectedBranchId = id || "";
+  if (branchSelect) branchSelect.value = selectedBranchId;
+
+  const branch = BRANCHES.find((b) => b.id === selectedBranchId) || null;
+
+  if (geoHint) geoHint.textContent = branch ? `Selected: ${branch.town}` : "Select a branch to order.";
+  if (orderNowBtn) orderNowBtn.disabled = !branch;
+
+  // center marker if map exists
+  if (branch && branchMap && branchMarkersById.has(branch.id)) {
+    const m = branchMarkersById.get(branch.id);
+    try {
+      branchMap.setView(m.getLatLng(), 12, { animate: true });
+      m.openPopup();
+    } catch {}
+  }
 }
 
-function createStoreCard(branch) {
-  const card = document.createElement("article");
-  card.className = "store";
-  card.dataset.id = branch.id;
-
-  card.innerHTML = `
-    <div class="store__top">
-      <h3 class="store__name">${escapeHtml(branch.town)}</h3>
-      <span class="store__badge">${escapeHtml(branch.postcode || "Branch")}</span>
-    </div>
-    <p class="store__addr">${escapeHtml(branch.name)}</p>
-    <div class="store__actions">
-      <button class="smallBtn smallBtn--primary" type="button">Select</button>
-      <a class="smallBtn" href="${branch.mapsUrl}" target="_blank" rel="noopener noreferrer">Directions</a>
-    </div>
-  `;
-
-  const go = () => {
-    if (branchSelect) branchSelect.value = branch.id;
-    highlightSelected(branch.id);
-    goToBranch(branch); // Option A redirect
-  };
-
-  const selectBtn = card.querySelector("button");
-  selectBtn?.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    go();
-  });
-
-  card.addEventListener("click", (e) => {
-    const tag = e.target?.tagName?.toLowerCase();
-    if (tag === "a" || tag === "button") return;
-    go();
-  });
-
-  return card;
+function goToBranch(branch) {
+  if (!branch || !branch.orderUrl) return;
+  window.location.href = branch.orderUrl;
 }
 
-function renderStoreGrid(list) {
-  if (!storeGrid) return;
-  storeGrid.innerHTML = "";
-  list.forEach((b) => storeGrid.appendChild(createStoreCard(b)));
-  highlightSelected(branchSelect?.value || null);
-}
+orderNowBtn?.addEventListener("click", () => {
+  const branch = BRANCHES.find((b) => b.id === selectedBranchId) || null;
+  if (!branch) {
+    document.getElementById("locations")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  goToBranch(branch);
+});
 
-/* =========================================================
-   Leaflet map
-   ========================================================= */
+branchSelect?.addEventListener("change", () => setSelectedBranch(branchSelect.value));
+
+/* ===================== Leaflet map ===================== */
 let branchMap = null;
 let branchLayer = null;
-let userMarker = null;
 const branchMarkersById = new Map();
 
 function initBranchMap() {
@@ -517,11 +373,7 @@ function initBranchMap() {
     marker.bindPopup(popupHtml);
     marker.addTo(branchLayer);
 
-    marker.on("click", () => {
-      if (branchSelect) branchSelect.value = b.id;
-      highlightSelected(b.id);
-    });
-
+    marker.on("click", () => setSelectedBranch(b.id));
     branchMarkersById.set(b.id, marker);
   }
 
@@ -530,91 +382,17 @@ function initBranchMap() {
     branchMap.fitBounds(bounds.pad(0.2));
   }
 
-  // Popup "Select" button handler → Option A redirect
+  // Handle "Select" inside popup
   branchMap.on("popupopen", (e) => {
     const node = e.popup.getElement();
     if (!node) return;
     const btn = node.querySelector("button[data-branch]");
     if (!btn) return;
-
-    btn.addEventListener("click", () => {
-      const id = btn.getAttribute("data-branch");
-      const b = BRANCHES.find((x) => x.id === id);
-      if (!b) return;
-      if (branchSelect) branchSelect.value = b.id;
-      highlightSelected(b.id);
-      goToBranch(b);
-    });
+    btn.addEventListener("click", () => setSelectedBranch(btn.getAttribute("data-branch")));
   });
 }
 
-geoBtn?.addEventListener("click", () => {
-  if (geoHint) geoHint.textContent = "Requesting location…";
-
-  if (!navigator.geolocation) {
-    if (geoHint) geoHint.textContent = "Geolocation is not supported in this browser.";
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      const { latitude, longitude } = pos.coords;
-      const { branch, distanceKm } = findClosestBranch(latitude, longitude);
-
-      if (branchMap && typeof L !== "undefined") {
-        if (userMarker) userMarker.remove();
-        userMarker = L.circleMarker([latitude, longitude], {
-          radius: 7,
-          weight: 2,
-          color: "#111",
-          fillColor: "#111",
-          fillOpacity: 0.9,
-        })
-          .addTo(branchMap)
-          .bindPopup("You are here");
-      }
-
-      if (!branch) {
-        if (geoHint) geoHint.textContent = "Could not find a nearby branch.";
-        return;
-      }
-
-      if (geoHint)
-        geoHint.textContent = `Closest branch: ${branch.town} (${distanceKm.toFixed(1)} km).`;
-
-      // Option A: choose closest and redirect
-      if (branchSelect) branchSelect.value = branch.id;
-      highlightSelected(branch.id);
-      goToBranch(branch);
-    },
-    (err) => {
-      if (!geoHint) return;
-      if (err.code === err.PERMISSION_DENIED) geoHint.textContent = "Location permission denied.";
-      else geoHint.textContent = "Could not get your location.";
-    },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
-  );
-});
-
-// Dropdown change → redirect (Option A)
-branchSelect?.addEventListener("change", () => {
-  const id = branchSelect.value;
-  if (!id) return;
-  const branch = BRANCHES.find((b) => b.id === id) || null;
-  if (!branch) return;
-  highlightSelected(branch.id);
-  goToBranch(branch);
-});
-
-clearBranch?.addEventListener("click", () => {
-  if (branchSelect) branchSelect.value = "";
-  if (geoHint) geoHint.textContent = "";
-  highlightSelected(null);
-});
-
-/* =========================================================
-   MENU: API mapping
-   ========================================================= */
+/* ===================== Menu proxy mapping ===================== */
 let MENU = [];
 
 function toPriceNumberFromStoreApi(p) {
@@ -631,8 +409,7 @@ function toPriceNumberFromStoreApi(p) {
 }
 
 function toCategoryFromStoreApi(p) {
-  const cat =
-    p?.categories && p.categories[0] && p.categories[0].name ? p.categories[0].name : "Menu";
+  const cat = p?.categories?.[0]?.name ? p.categories[0].name : "Menu";
   return cat;
 }
 
@@ -643,8 +420,6 @@ function toImageFromStoreApi(p) {
 
 async function loadMenuFromProxy() {
   if (menuStatus) menuStatus.textContent = "Loading menu…";
-
-  // reset used markers per load so fallbacks distribute nicely
   for (const cat of Object.keys(USED_LOCAL_INDEX)) USED_LOCAL_INDEX[cat].clear();
 
   const res = await fetch(MENU_PROXY_ENDPOINT, { method: "GET" });
@@ -653,76 +428,97 @@ async function loadMenuFromProxy() {
   const data = await res.json();
   if (!Array.isArray(data)) throw new Error("Menu proxy returned non-array JSON");
 
-  const mapped = data.map((p) => {
+  MENU = data.map((p) => {
     const rawCategory = toCategoryFromStoreApi(p);
     const category = normalizeCategory(rawCategory);
 
     const price = toPriceNumberFromStoreApi(p);
-    const desc = stripHtml(p?.short_description || p?.description || "");
+
+    // Requirement 14: use names + descriptions from new menu
+    const nameRaw = String(p?.name ?? "Item").trim();
+    const descRaw = stripHtml(p?.short_description || p?.description || "");
+
     const apiImg = toImageFromStoreApi(p);
-
-    const nameRaw = String(p?.name ?? "Item");
-    const name = nameRaw.toUpperCase();
-
-    // local match + fallback so PNGs don’t disappear
     const localMatch = resolveLocalImage(category, nameRaw);
     const localImg = localMatch?.src || "";
 
     return {
       id: String(p?.id ?? crypto.randomUUID()),
-      name,
+      name: nameRaw,
       category: String(category || "Menu"),
       price,
-      description: desc,
+      description: descRaw,
       image: localImg || apiImg || "",
       _localOrder: Number.isFinite(localMatch?.index) ? localMatch.index : 9999,
     };
-  });
+  }).filter(x => x.name && x.name.trim().length > 0);
 
-  MENU = mapped.filter((x) => x.name && x.name.trim().length > 0);
-  if (menuStatus) menuStatus.textContent = MENU.length ? "" : "Menu is empty.";
+  if (menuStatus) menuStatus.textContent = "";
 }
 
-/* =========================================================
-   Menu rendering + category bar
-   ========================================================= */
-const CATEGORY_ORDER = ["Burgers", "Loaded Fries", "Sauces", "Shakes", "Sides", "Wings", "Specials"];
-
-function normalizeCat(c) {
-  return String(c || "").trim();
+/* ===================== Rules (1–14) ===================== */
+function ensureDescription(item) {
+  const d = String(item.description || "").trim();
+  return d ? item : { ...item, description: "See in-store menu for full details." };
 }
 
-function getCategoriesOrdered() {
-  const set = new Set(MENU.map((x) => normalizeCat(x.category)));
-  const cats = Array.from(set);
-
-  const ordered = [];
-  for (const c of CATEGORY_ORDER) if (cats.includes(c)) ordered.push(c);
-
-  const leftovers = cats
-    .filter((c) => !ordered.includes(c))
-    .sort((a, b) => a.localeCompare(b));
-
-  return ["Featured", ...ordered, ...leftovers];
+function enforceBurgerFries(item) {
+  if (item.category !== "Burgers") return item;
+  const add = "Served with Skin-on Fries.";
+  const d = String(item.description || "").trim();
+  const has = d.toLowerCase().includes("skin-on fries");
+  return {
+    ...item,
+    description: has ? d : (d ? `${d} • ${add}` : add),
+    _badge: "Served with Skin-on Fries",
+  };
 }
 
-function splitToLines(item) {
-  const raw = String(item.description || "")
-    .replace(/\r/g, "")
-    .replace(/•/g, ",")
-    .replace(/\|/g, ",")
-    .trim();
-
-  if (!raw) return [];
-  const parts = raw
-    .split(/\n|,/)
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  if (parts.length <= 1) return [raw.toUpperCase()];
-  return parts.map((x) => x.toUpperCase());
+function burgerSortKey(name) {
+  const n = burgerNumberFromName(name);
+  if (Number.isFinite(n)) return n;
+  const low = String(name || "").toLowerCase();
+  const map = { one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8 };
+  for (const [w, v] of Object.entries(map)) if (low.includes(`number ${w}`)) return v;
+  return 999;
 }
 
+function onlyRequiredCategories(items) {
+  return items.filter(it => REQUIRED_CATEGORY_ORDER.includes(it.category));
+}
+
+function orderedCategoriesPresent(items) {
+  const present = new Set(items.map(i => i.category));
+  return REQUIRED_CATEGORY_ORDER.filter(c => present.has(c));
+}
+
+/* Requirement 8: wings split per flavour if generic */
+function splitWings(items) {
+  const out = [];
+  const flavourNames = (LOCAL_IMAGE_MAP.Wings || []).map(fileBase); // "BBQ Wings"...
+
+  for (const it of items) {
+    if (it.category !== "Wings") { out.push(it); continue; }
+
+    const nameKey = normKey(it.name);
+    const isGeneric = (nameKey === "wings" || nameKey === "chicken wings");
+
+    if (!isGeneric) { out.push(it); continue; }
+
+    for (const fl of flavourNames) {
+      out.push({
+        ...it,
+        id: `${it.id}-${normKey(fl).replace(/\s+/g, "-")}`,
+        name: fl,
+        description: it.description ? `${it.description} Flavour: ${fl}.` : `Flavour: ${fl}.`,
+        image: resolveLocalImage("Wings", fl)?.src || it.image,
+      });
+    }
+  }
+  return out;
+}
+
+/* ===================== Render ===================== */
 function scrollToSection(cat) {
   const id = `cat-${cat.toLowerCase().replace(/\s+/g, "-")}`;
   const el = document.getElementById(id);
@@ -730,11 +526,9 @@ function scrollToSection(cat) {
   el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function renderCategoryBar(activeCat) {
+function renderCategoryBar(activeCat, cats) {
   if (!catBar) return;
   catBar.innerHTML = "";
-  const cats = getCategoriesOrdered();
-
   cats.forEach((cat) => {
     const btn = document.createElement("button");
     btn.className = "catBtn" + (cat === activeCat ? " is-active" : "");
@@ -745,22 +539,20 @@ function renderCategoryBar(activeCat) {
   });
 }
 
-function getLocalOrderVal(x) {
-  return Number.isFinite(x?._localOrder) ? x._localOrder : 9999;
+function splitToLines(item) {
+  const raw = String(item.description || "").replace(/\r/g, "").replace(/•/g, ",").trim();
+  if (!raw) return [];
+  const parts = raw.split(/\n|,/).map(s => s.trim()).filter(Boolean);
+  return parts.length <= 1 ? [raw] : parts;
 }
 
-function featuredCategoryRank(cat) {
-  const order = ["Burgers", "Loaded Fries", "Sauces", "Shakes", "Sides", "Wings", "Specials"];
-  const idx = order.indexOf(cat);
-  return idx === -1 ? 9999 : idx;
-}
-
-function renderMenuSections() {
+function renderMenuSections(items) {
   if (!menuSections) return;
   menuSections.innerHTML = "";
+  if (backupMenu) backupMenu.hidden = true;
 
-  const cats = getCategoriesOrdered();
-  renderCategoryBar(cats[0] || "Menu");
+  const cats = orderedCategoriesPresent(items);
+  renderCategoryBar(cats[0] || "", cats);
 
   cats.forEach((cat) => {
     const section = document.createElement("section");
@@ -772,49 +564,38 @@ function renderMenuSections() {
     head.textContent = cat.toUpperCase();
     section.appendChild(head);
 
-    const items =
-      cat === "Featured"
-        ? MENU.filter(hasPngImage).sort((a, b) => {
-            const ar = featuredCategoryRank(a.category);
-            const br = featuredCategoryRank(b.category);
-            if (ar !== br) return ar - br;
-
-            const ao = getLocalOrderVal(a);
-            const bo = getLocalOrderVal(b);
-            if (ao !== bo) return ao - bo;
-
-            return String(a.name || "").localeCompare(String(b.name || ""));
-          })
-        : MENU.filter((x) => normalizeCat(x.category) === cat).sort((a, b) => {
-            const ao = getLocalOrderVal(a);
-            const bo = getLocalOrderVal(b);
-            if (ao !== bo) return ao - bo;
-            return String(a.name || "").localeCompare(String(b.name || ""));
-          });
-
-    if (cat === "Featured" && items.length === 0) {
-      const empty = document.createElement("div");
-      empty.className = "status";
-      empty.textContent = "No featured items yet.";
-      section.appendChild(empty);
-      menuSections.appendChild(section);
-      return;
+    if (cat === "Burgers") {
+      const note = document.createElement("div");
+      note.className = "menuSection__note";
+      note.textContent = "All burgers are served with Skin-on Fries.";
+      section.appendChild(note);
     }
 
-    items.forEach((item) => {
+    const catItems = items
+      .filter(x => x.category === cat)
+      .sort((a,b) => {
+        if (cat === "Burgers") {
+          const ak = burgerSortKey(a.name);
+          const bk = burgerSortKey(b.name);
+          if (ak !== bk) return ak - bk;
+        }
+        const ao = Number.isFinite(a._localOrder) ? a._localOrder : 9999;
+        const bo = Number.isFinite(b._localOrder) ? b._localOrder : 9999;
+        if (ao !== bo) return ao - bo;
+        return String(a.name||"").localeCompare(String(b.name||""));
+      });
+
+    catItems.forEach((item) => {
       const row = document.createElement("article");
       row.className = "menuItem";
+      row.dataset.itemId = item.id;
 
-      const img = hasImage(item)
-        ? `<img class="menuItem__img" src="${item.image}" alt="${escapeHtml(
-            item.name
-          )}" loading="lazy" />`
+      const img = item.image
+        ? `<img class="menuItem__img" src="${item.image}" alt="${escapeHtml(item.name)}" loading="lazy" />`
         : `<div class="menuItem__img" aria-hidden="true"></div>`;
 
-      const lines = splitToLines(item)
-        .slice(0, 18)
-        .map((l) => `<div class="line">${escapeHtml(l)}</div>`)
-        .join("");
+      const lines = splitToLines(item).slice(0, 14).map(l => `<div class="line">${escapeHtml(l)}</div>`).join("");
+      const badge = item._badge ? `<div class="badgeRow"><span class="badge">${escapeHtml(item._badge)}</span></div>` : "";
 
       row.innerHTML = `
         <div class="menuItem__left">${img}</div>
@@ -824,26 +605,51 @@ function renderMenuSections() {
             <div class="menuItem__price">${moneyGBP(item.price)}</div>
           </div>
           <div class="menuItem__lines">${lines}</div>
+          ${badge}
         </div>
       `;
 
+      // Click item => upsell popup
+      row.addEventListener("click", () => openUpsell(item));
       section.appendChild(row);
     });
 
     menuSections.appendChild(section);
   });
 
-  setupActiveCategoryObserver();
+  setupActiveCategoryObserver(cats);
 }
 
-/* =========================================================
-   API FAILBACK: show backup PNG menu image
-   ========================================================= */
+/* highlight active category while scrolling */
+let catObserver = null;
+function setupActiveCategoryObserver(cats) {
+  if (catObserver) catObserver.disconnect();
+
+  const els = cats
+    .map(cat => document.getElementById(`cat-${cat.toLowerCase().replace(/\s+/g, "-")}`))
+    .filter(Boolean);
+
+  if (!els.length) return;
+
+  catObserver = new IntersectionObserver((entries) => {
+    const visible = entries.filter(e => e.isIntersecting).sort((a,b) => b.intersectionRatio - a.intersectionRatio)[0];
+    if (!visible) return;
+
+    const id = visible.target.id.replace("cat-", "");
+    const activeCat = id.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+    renderCategoryBar(activeCat, cats);
+  }, { threshold:[0.12, 0.2, 0.35, 0.5] });
+
+  els.forEach(el => catObserver.observe(el));
+}
+
+/* backup menu if API fails */
 function showBackupMenuImage() {
   if (menuStatus) menuStatus.textContent = "Showing backup menu image (API unavailable).";
   if (catBar) catBar.innerHTML = "";
-  if (!menuSections) return;
+  if (backupMenu) backupMenu.hidden = false;
 
+  if (!menuSections) return;
   menuSections.innerHTML = `
     <section class="menuSection" id="cat-backup">
       <div class="menuSection__head">MENU</div>
@@ -862,83 +668,106 @@ function showBackupMenuImage() {
   `;
 }
 
-/* =========================================================
-   Active category highlighting
-   ========================================================= */
-let catObserver = null;
-
-function setupActiveCategoryObserver() {
-  if (catObserver) catObserver.disconnect();
-
-  const catIds = getCategoriesOrdered().map(
-    (cat) => `cat-${cat.toLowerCase().replace(/\s+/g, "-")}`
-  );
-  const els = catIds.map((id) => document.getElementById(id)).filter(Boolean);
-  if (!els.length) return;
-
-  catObserver = new IntersectionObserver(
-    (entries) => {
-      const visible = entries
-        .filter((e) => e.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-
-      if (!visible) return;
-
-      const id = visible.target.id.replace("cat-", "");
-      const activeCat = id
-        .split("-")
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" ");
-
-      renderCategoryBar(activeCat);
-    },
-    { root: null, threshold: [0.12, 0.2, 0.35, 0.5] }
-  );
-
-  els.forEach((el) => catObserver.observe(el));
-}
-
-/* =========================================================
-   Hero slider (optional)
-   ========================================================= */
-const HERO_IMAGES = [
-  "assets/mae-mu-I7A_pHLcQK8-unsplash.jpg",
-  "assets/mae-mu-I7A_pHLcQK8-unsplash.jpg",
-  "assets/mae-mu-I7A_pHLcQK8-unsplash.jpg",
-  "assets/mae-mu-I7A_pHLcQK8-unsplash.jpg",
-  "assets/mae-mu-I7A_pHLcQK8-unsplash.jpg",
-  "assets/mae-mu-I7A_pHLcQK8-unsplash.jpg",
+/* ===================== Upsell modal (unstickable) ===================== */
+const UPSELL_OPTIONS = [
+  { id: "fries", name: "Extra Skin-on Fries", desc: "Crispy upgrade." },
+  { id: "drink", name: "Add a Drink", desc: "Perfect pairing." },
+  { id: "sauce", name: "Add a Sauce", desc: "Pick a dip." },
 ];
 
-let heroPos = 0;
+let upsellSelected = new Set();
+let lastClickedItem = null;
 
-function renderHero() {
-  if (!heroImg) return;
-  if (heroTotal) heroTotal.textContent = String(HERO_IMAGES.length);
-  if (heroIndex) heroIndex.textContent = String(heroPos + 1);
-  heroImg.src = HERO_IMAGES[heroPos];
+function closeUpsellHard() {
+  // Always hide BOTH elements, even if state is broken
+  document.getElementById("upsellBackdrop")?.setAttribute("hidden", "");
+  document.getElementById("upsellModal")?.setAttribute("hidden", "");
+  upsellSelected = new Set();
+  lastClickedItem = null;
 }
-function heroStep(delta) {
-  heroPos = (heroPos + delta + HERO_IMAGES.length) % HERO_IMAGES.length;
-  renderHero();
-}
-heroPrev?.addEventListener("click", () => heroStep(-1));
-heroNext?.addEventListener("click", () => heroStep(1));
+window.closeUpsellHard = closeUpsellHard; // handy for console debugging
 
-/* =========================================================
-   INIT
-   ========================================================= */
-(function init() {
-  renderSelectOptions();
-  renderStoreGrid(BRANCHES);
+function openUpsell(item) {
+  lastClickedItem = item;
+  upsellSelected = new Set();
 
-  initBranchMap();
-  renderHero();
+  if (!upsellOptionsRoot || !upsellForItem || !upsellBackdrop || !upsellModal) return;
 
-  loadMenuFromProxy()
-    .then(() => renderMenuSections())
-    .catch((err) => {
-      console.warn("Menu load failed:", err);
-      showBackupMenuImage(); // PNG backup
+  upsellForItem.textContent = `For: ${item.name}`;
+  upsellOptionsRoot.innerHTML = "";
+
+  UPSELL_OPTIONS.forEach((opt) => {
+    const div = document.createElement("div");
+    div.className = "upsellOpt";
+    div.dataset.id = opt.id;
+    div.innerHTML = `
+      <div class="upsellOpt__name">${escapeHtml(opt.name)}</div>
+      <div class="upsellOpt__desc">${escapeHtml(opt.desc)}</div>
+    `;
+    div.addEventListener("click", () => {
+      const id = div.dataset.id;
+      if (upsellSelected.has(id)) {
+        upsellSelected.delete(id);
+        div.classList.remove("is-selected");
+      } else {
+        upsellSelected.add(id);
+        div.classList.add("is-selected");
+      }
     });
+    upsellOptionsRoot.appendChild(div);
+  });
+
+  // show
+  upsellBackdrop.removeAttribute("hidden");
+  upsellModal.removeAttribute("hidden");
+}
+
+/* Direct button handlers */
+upsellClose?.addEventListener("click", closeUpsellHard);
+upsellSkip?.addEventListener("click", closeUpsellHard);
+
+upsellBackdrop?.addEventListener("click", (e) => {
+  // only close if they clicked the backdrop itself (not modal)
+  if (e.target === upsellBackdrop) closeUpsellHard();
+});
+
+upsellGoOrder?.addEventListener("click", () => {
+  closeUpsellHard();
+  const branch = BRANCHES.find((b) => b.id === selectedBranchId) || null;
+  if (!branch) {
+    document.getElementById("locations")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  goToBranch(branch);
+});
+
+/* GLOBAL safety: if anything goes wrong, this still closes it */
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeUpsellHard();
+});
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  if (!t) return;
+  if (t.id === "upsellBackdrop") closeUpsellHard();
+});
+
+/* ===================== INIT ===================== */
+(async function init() {
+  renderSelectOptions();
+  setSelectedBranch(""); // disables Order Now until branch chosen
+  initBranchMap();
+
+  try {
+    await loadMenuFromProxy();
+
+    let items = MENU.map(ensureDescription).map(enforceBurgerFries);
+    items = onlyRequiredCategories(items);
+    items = splitWings(items);
+
+    renderMenuSections(items);
+    if (menuStatus) menuStatus.textContent = "";
+  } catch (err) {
+    console.warn("Menu load failed:", err);
+    showBackupMenuImage();
+  }
 })();

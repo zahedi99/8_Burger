@@ -7,7 +7,7 @@
 
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- Leaflet (FIXED: no integrity attributes) -->
+  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 
@@ -30,16 +30,13 @@
   </header>
 
   <main>
-    <!-- Hero -->
-    <section class="hero">
-      <div class="hero__wrap">
-        <div class="hero__imgWrap">
-          <img id="heroImg" class="hero__img" src="assets/mae-mu-I7A_pHLcQK8-unsplash.jpg" alt="Burger hero" />
-        </div>
-        <div class="hero__controls">
-          <button id="heroPrev" class="heroBtn" type="button" aria-label="Previous image">‹</button>
-          <div class="hero__counter"><span id="heroIndex">1</span>/<span id="heroTotal">1</span></div>
-          <button id="heroNext" class="heroBtn" type="button" aria-label="Next image">›</button>
+    <!-- HERO (split 2/3 photos, no buttons/border) -->
+    <section class="heroSplit">
+      <div class="heroSplit__wrap">
+        <div class="heroSplit__grid">
+          <img class="heroSplit__img heroSplit__a" src="assets/mae-mu-I7A_pHLcQK8-unsplash.jpg" alt="Burger 8 hero 1" />
+          <img class="heroSplit__img heroSplit__b" src="assets/mae-mu-I7A_pHLcQK8-unsplash.jpg" alt="Burger 8 hero 2" />
+          <img class="heroSplit__img heroSplit__c" src="assets/mae-mu-I7A_pHLcQK8-unsplash.jpg" alt="Burger 8 hero 3" />
         </div>
       </div>
     </section>
@@ -51,13 +48,13 @@
         <div id="menuStatus" class="status"></div>
       </div>
 
-      <!-- category bar -->
+      <!-- Floating category bar -->
       <div id="catBar" class="catBar"></div>
 
-      <!-- API menu goes here -->
+      <!-- API menu renders here -->
       <div id="menuSections" class="menu"></div>
 
-      <!-- PNG backup menu (shown only if API fails) -->
+      <!-- PNG backup menu (only if API fails) -->
       <div id="backupMenu" class="backupMenu" hidden>
         <div class="backupMenu__head">
           <div class="backupMenu__title">Menu (Backup)</div>
@@ -72,14 +69,14 @@
       </div>
     </section>
 
-    <!-- LOCATIONS -->
+    <!-- LOCATIONS (dropdown + map only) -->
     <section id="locations" class="section">
       <div class="section__head">
         <h2 class="section__title">Locations</h2>
-        <p class="section__sub">Select a branch to open its ordering page.</p>
+        <p class="section__sub">Choose a branch, then press Order Now.</p>
       </div>
 
-      <div class="controlsRow">
+      <div class="controlsRow controlsRow--compact">
         <label class="label">
           Choose a branch
           <select id="branchSelect" class="select">
@@ -87,19 +84,10 @@
           </select>
         </label>
 
-        <button id="goBranchBtn" class="primaryBtn" type="button" disabled>
-          Go to branch
-        </button>
-
-        <button id="geoBtn" class="ghostBtn" type="button">
-          Find closest
-        </button>
-
         <div id="geoHint" class="hint"></div>
       </div>
 
-      <div class="mapGrid">
-        <div id="storeGrid" class="storeGrid"></div>
+      <div class="mapGrid mapGrid--single">
         <div class="mapCard">
           <div id="branchMap" class="map"></div>
         </div>
@@ -107,11 +95,40 @@
     </section>
   </main>
 
+  <!-- FIXED Order Now button -->
+  <button id="orderNowBtn" class="orderNowBtn" type="button" aria-label="Order now" disabled>
+    Order Now
+  </button>
+
+  <!-- Upsell modal -->
+  <div id="upsellBackdrop" class="modalBackdrop" hidden></div>
+
+  <div id="upsellModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="upsellTitle" hidden>
+    <div class="modalCard">
+      <div class="modalTop">
+        <h3 id="upsellTitle" class="modalTitle">Add something extra?</h3>
+
+        <!-- IMPORTANT: keep this exact id -->
+        <button id="upsellClose" class="iconBtn" type="button" aria-label="Close">✕</button>
+      </div>
+
+      <div id="upsellForItem" class="modalSub"></div>
+
+      <div id="upsellOptions" class="upsellGrid"></div>
+
+      <div class="modalActions">
+        <!-- IMPORTANT: keep these exact ids -->
+        <button id="upsellSkip" class="ghostBtn" type="button">Skip</button>
+        <button id="upsellGoOrder" class="primaryBtn" type="button">Continue to order</button>
+      </div>
+    </div>
+  </div>
+
   <footer class="footer">
     <div>© <span id="year"></span> Burger 8</div>
   </footer>
 
-  <!-- Leaflet JS (FIXED: no integrity attributes) -->
+  <!-- Leaflet -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="script.js"></script>
 </body>
