@@ -7,8 +7,13 @@
 
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Leaflet (MAP) -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
 </head>
 
 <body>
@@ -16,7 +21,7 @@
     <div class="topbar__inner">
       <div class="brand">
         <img class="brand__logo" src="assets/burger_8_logo.png" alt="Burger 8 logo" />
-        <div class="brand__text">
+        <div>
           <div class="brand__name">BURGER 8</div>
           <div class="brand__tag">Always Fresh</div>
         </div>
@@ -30,14 +35,10 @@
   </header>
 
   <main>
-    <!-- HERO (split 2/3 photos, no buttons/border) -->
-    <section class="heroSplit">
-      <div class="heroSplit__wrap">
-        <div class="heroSplit__grid">
-          <img class="heroSplit__img heroSplit__a" src="assets/mae-mu-I7A_pHLcQK8-unsplash.jpg" alt="Burger 8 hero 1" />
-          <img class="heroSplit__img heroSplit__b" src="assets/mae-mu-I7A_pHLcQK8-unsplash.jpg" alt="Burger 8 hero 2" />
-          <img class="heroSplit__img heroSplit__c" src="assets/mae-mu-I7A_pHLcQK8-unsplash.jpg" alt="Burger 8 hero 3" />
-        </div>
+    <!-- HERO SLIDESHOW (auto-filled from JS list) -->
+    <section class="heroSlideshow">
+      <div class="heroSlideshow__wrap">
+        <div class="heroSlideshow__track" id="heroTrack"></div>
       </div>
     </section>
 
@@ -48,25 +49,14 @@
         <div id="menuStatus" class="status"></div>
       </div>
 
-      <!-- Floating category bar -->
+      <!-- Sticky category bar -->
       <div id="catBar" class="catBar"></div>
 
-      <!-- API menu renders here -->
+      <!-- Menu sections -->
       <div id="menuSections" class="menu"></div>
 
-      <!-- PNG backup menu (only if API fails) -->
-      <div id="backupMenu" class="backupMenu" hidden>
-        <div class="backupMenu__head">
-          <div class="backupMenu__title">Menu (Backup)</div>
-          <div class="backupMenu__hint">Live menu unavailable — showing backup image.</div>
-        </div>
-        <img
-          class="backupMenu__img"
-          src="assets/burger8_menu_converted.png"
-          alt="Burger 8 backup menu"
-          loading="lazy"
-        />
-      </div>
+      <!-- Backup menu container (hidden unless API fails) -->
+      <div id="backupMenu" hidden></div>
     </section>
 
     <!-- LOCATIONS (dropdown + map only) -->
@@ -76,7 +66,7 @@
         <p class="section__sub">Choose a branch, then press Order Now.</p>
       </div>
 
-      <div class="controlsRow controlsRow--compact">
+      <div class="controlsRow">
         <label class="label">
           Choose a branch
           <select id="branchSelect" class="select">
@@ -84,31 +74,34 @@
           </select>
         </label>
 
-        <div id="geoHint" class="hint"></div>
+        <div id="geoHint" class="hint">Select a branch to order.</div>
       </div>
 
-      <div class="mapGrid mapGrid--single">
-        <div class="mapCard">
-          <div id="branchMap" class="map"></div>
-        </div>
+      <div class="mapCard">
+        <div id="branchMap" class="map"></div>
       </div>
     </section>
   </main>
 
   <!-- FIXED Order Now button -->
-  <button id="orderNowBtn" class="orderNowBtn" type="button" aria-label="Order now" disabled>
-    Order Now
+  <button id="orderNowBtn" class="orderNowBtn" type="button" disabled>
+    ORDER NOW
   </button>
 
   <!-- Upsell modal -->
   <div id="upsellBackdrop" class="modalBackdrop" hidden></div>
 
-  <div id="upsellModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="upsellTitle" hidden>
+  <div
+    id="upsellModal"
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="upsellTitle"
+    hidden
+  >
     <div class="modalCard">
       <div class="modalTop">
         <h3 id="upsellTitle" class="modalTitle">Add something extra?</h3>
-
-        <!-- IMPORTANT: keep this exact id -->
         <button id="upsellClose" class="iconBtn" type="button" aria-label="Close">✕</button>
       </div>
 
@@ -117,7 +110,6 @@
       <div id="upsellOptions" class="upsellGrid"></div>
 
       <div class="modalActions">
-        <!-- IMPORTANT: keep these exact ids -->
         <button id="upsellSkip" class="ghostBtn" type="button">Skip</button>
         <button id="upsellGoOrder" class="primaryBtn" type="button">Continue to order</button>
       </div>
@@ -128,8 +120,13 @@
     <div>© <span id="year"></span> Burger 8</div>
   </footer>
 
-  <!-- Leaflet -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Leaflet (MAP) -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
   <script src="script.js"></script>
 </body>
 </html>

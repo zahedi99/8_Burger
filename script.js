@@ -1,10 +1,74 @@
 /* =========================================================
    Burger 8 — script.js (FULL)
-   Fixes:
-   - Upsell modal cannot get stuck
-   - [hidden] enforced in CSS
-   - Close works: X / backdrop / ESC / Skip / Continue
 ========================================================= */
+
+/* ================= HERO SLIDESHOW (ALL JPGs + SHUFFLE) ================= */
+
+const HERO_BASE =
+  "assets/1350 x 1080 - Social Posts-20260207T153633Z-3-001/1350 x 1080 - Social Posts";
+
+// Burgers: No.1.jpg → No.8.jpg
+const HERO_BURGERS = Array.from({ length: 8 }, (_, i) => `${HERO_BASE}/Burgers/No.${i + 1}.jpg`);
+
+// Sides (JPG)
+const HERO_SIDES = [
+  `${HERO_BASE}/Sides/Cheesy Jalapeno Bites.jpg`,
+  `${HERO_BASE}/Sides/Curly Fries.jpg`,
+  `${HERO_BASE}/Sides/Fries.jpg`,
+  `${HERO_BASE}/Sides/Mozzerella Sticks.jpg`,
+  `${HERO_BASE}/Sides/Onion Rings.jpg`,
+  `${HERO_BASE}/Sides/Sweet Potato Fries.jpg`,
+];
+
+// Shakes (JPG)
+const HERO_SHAKES = [
+  `${HERO_BASE}/Shakes/Malteaser.jpg`,
+  `${HERO_BASE}/Shakes/Mint Aero.jpg`,
+  `${HERO_BASE}/Shakes/Mint Aero Single.jpg`,
+  `${HERO_BASE}/Shakes/Nutella.jpg`,
+  `${HERO_BASE}/Shakes/Nutella Single.jpg`,
+  `${HERO_BASE}/Shakes/Oreo.jpg`,
+  `${HERO_BASE}/Shakes/Oreo Single.jpg`,
+];
+
+const HERO_IMAGES = [
+  ...HERO_BURGERS,
+  ...HERO_SIDES,
+  ...HERO_SHAKES,
+];
+
+function initHeroSlideshow() {
+  const track = document.getElementById("heroTrack");
+  if (!track) return;
+
+  track.innerHTML = "";
+
+  // Shuffle each refresh (Fisher–Yates)
+  const slides = HERO_IMAGES.slice();
+  for (let i = slides.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [slides[i], slides[j]] = [slides[j], slides[i]];
+  }
+
+  slides.forEach((src, i) => {
+    const img = document.createElement("img");
+    img.src = src;
+    img.alt = `Burger 8 slide ${i + 1}`;
+    img.loading = i === 0 ? "eager" : "lazy";
+    track.appendChild(img);
+  });
+
+  const imgs = track.querySelectorAll("img");
+  if (imgs.length <= 1) return;
+
+  let index = 0;
+  const count = imgs.length;
+
+  setInterval(() => {
+    index = (index + 1) % count;
+    track.style.transform = `translateX(-${index * 100}%)`;
+  }, 4000);
+}
 
 /* ===================== BRANCHES ===================== */
 const BRANCHES = [
@@ -32,7 +96,7 @@ const REQUIRED_CATEGORY_ORDER = [
   "Sauces",
 ];
 
-/* ===================== LOCAL PNGS ===================== */
+/* ===================== LOCAL PNGS (menu item images) ===================== */
 const IMAGE_BASE = "assets/PNG-20260116T144520Z-3-001/PNG";
 const LOCAL_IMAGE_MAP = {
   Burgers: [
@@ -293,13 +357,9 @@ function setSelectedBranch(id) {
   if (geoHint) geoHint.textContent = branch ? `Selected: ${branch.town}` : "Select a branch to order.";
   if (orderNowBtn) orderNowBtn.disabled = !branch;
 
-  // center marker if map exists
   if (branch && branchMap && branchMarkersById.has(branch.id)) {
     const m = branchMarkersById.get(branch.id);
-    try {
-      branchMap.setView(m.getLatLng(), 12, { animate: true });
-      m.openPopup();
-    } catch {}
+    try { branchMap.setView(m.getLatLng(), 12, { animate: true }); m.openPopup(); } catch {}
   }
 }
 
@@ -326,7 +386,14 @@ const branchMarkersById = new Map();
 
 function initBranchMap() {
   const mapEl = document.getElementById("branchMap");
-  if (!mapEl || typeof L === "undefined") return;
+  if (!mapEl) return;
+
+  // If Leaflet didn't load, don't crash the page.
+  if (typeof L === "undefined") {
+    console.warn("Leaflet not loaded. Map will not render.");
+    mapEl.innerHTML = `<div style="padding:16px;font-weight:900;color:#444;">Map failed to load.</div>`;
+    return;
+  }
 
   const points = BRANCHES
     .filter((b) => Number.isFinite(b.lat) && Number.isFinite(b.lon))
@@ -382,7 +449,6 @@ function initBranchMap() {
     branchMap.fitBounds(bounds.pad(0.2));
   }
 
-  // Handle "Select" inside popup
   branchMap.on("popupopen", (e) => {
     const node = e.popup.getElement();
     if (!node) return;
@@ -434,7 +500,6 @@ async function loadMenuFromProxy() {
 
     const price = toPriceNumberFromStoreApi(p);
 
-    // Requirement 14: use names + descriptions from new menu
     const nameRaw = String(p?.name ?? "Item").trim();
     const descRaw = stripHtml(p?.short_description || p?.description || "");
 
@@ -456,7 +521,7 @@ async function loadMenuFromProxy() {
   if (menuStatus) menuStatus.textContent = "";
 }
 
-/* ===================== Rules (1–14) ===================== */
+/* ===================== Rules ===================== */
 function ensureDescription(item) {
   const d = String(item.description || "").trim();
   return d ? item : { ...item, description: "See in-store menu for full details." };
@@ -492,17 +557,15 @@ function orderedCategoriesPresent(items) {
   return REQUIRED_CATEGORY_ORDER.filter(c => present.has(c));
 }
 
-/* Requirement 8: wings split per flavour if generic */
 function splitWings(items) {
   const out = [];
-  const flavourNames = (LOCAL_IMAGE_MAP.Wings || []).map(fileBase); // "BBQ Wings"...
+  const flavourNames = (LOCAL_IMAGE_MAP.Wings || []).map(fileBase);
 
   for (const it of items) {
     if (it.category !== "Wings") { out.push(it); continue; }
 
     const nameKey = normKey(it.name);
     const isGeneric = (nameKey === "wings" || nameKey === "chicken wings");
-
     if (!isGeneric) { out.push(it); continue; }
 
     for (const fl of flavourNames) {
@@ -609,7 +672,6 @@ function renderMenuSections(items) {
         </div>
       `;
 
-      // Click item => upsell popup
       row.addEventListener("click", () => openUpsell(item));
       section.appendChild(row);
     });
@@ -620,7 +682,6 @@ function renderMenuSections(items) {
   setupActiveCategoryObserver(cats);
 }
 
-/* highlight active category while scrolling */
 let catObserver = null;
 function setupActiveCategoryObserver(cats) {
   if (catObserver) catObserver.disconnect();
@@ -632,7 +693,9 @@ function setupActiveCategoryObserver(cats) {
   if (!els.length) return;
 
   catObserver = new IntersectionObserver((entries) => {
-    const visible = entries.filter(e => e.isIntersecting).sort((a,b) => b.intersectionRatio - a.intersectionRatio)[0];
+    const visible = entries
+      .filter(e => e.isIntersecting)
+      .sort((a,b) => b.intersectionRatio - a.intersectionRatio)[0];
     if (!visible) return;
 
     const id = visible.target.id.replace("cat-", "");
@@ -643,7 +706,6 @@ function setupActiveCategoryObserver(cats) {
   els.forEach(el => catObserver.observe(el));
 }
 
-/* backup menu if API fails */
 function showBackupMenuImage() {
   if (menuStatus) menuStatus.textContent = "Showing backup menu image (API unavailable).";
   if (catBar) catBar.innerHTML = "";
@@ -668,7 +730,7 @@ function showBackupMenuImage() {
   `;
 }
 
-/* ===================== Upsell modal (unstickable) ===================== */
+/* ===================== Upsell modal ===================== */
 const UPSELL_OPTIONS = [
   { id: "fries", name: "Extra Skin-on Fries", desc: "Crispy upgrade." },
   { id: "drink", name: "Add a Drink", desc: "Perfect pairing." },
@@ -679,13 +741,12 @@ let upsellSelected = new Set();
 let lastClickedItem = null;
 
 function closeUpsellHard() {
-  // Always hide BOTH elements, even if state is broken
   document.getElementById("upsellBackdrop")?.setAttribute("hidden", "");
   document.getElementById("upsellModal")?.setAttribute("hidden", "");
   upsellSelected = new Set();
   lastClickedItem = null;
 }
-window.closeUpsellHard = closeUpsellHard; // handy for console debugging
+window.closeUpsellHard = closeUpsellHard;
 
 function openUpsell(item) {
   lastClickedItem = item;
@@ -717,17 +778,14 @@ function openUpsell(item) {
     upsellOptionsRoot.appendChild(div);
   });
 
-  // show
   upsellBackdrop.removeAttribute("hidden");
   upsellModal.removeAttribute("hidden");
 }
 
-/* Direct button handlers */
 upsellClose?.addEventListener("click", closeUpsellHard);
 upsellSkip?.addEventListener("click", closeUpsellHard);
 
 upsellBackdrop?.addEventListener("click", (e) => {
-  // only close if they clicked the backdrop itself (not modal)
   if (e.target === upsellBackdrop) closeUpsellHard();
 });
 
@@ -741,18 +799,14 @@ upsellGoOrder?.addEventListener("click", () => {
   goToBranch(branch);
 });
 
-/* GLOBAL safety: if anything goes wrong, this still closes it */
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeUpsellHard();
-});
-document.addEventListener("click", (e) => {
-  const t = e.target;
-  if (!t) return;
-  if (t.id === "upsellBackdrop") closeUpsellHard();
 });
 
 /* ===================== INIT ===================== */
 (async function init() {
+  initHeroSlideshow();
+
   renderSelectOptions();
   setSelectedBranch(""); // disables Order Now until branch chosen
   initBranchMap();
