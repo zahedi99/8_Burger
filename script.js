@@ -1,85 +1,4 @@
-/* =========================================================
-   Burger 8 — script.js (FULL)
-========================================================= */
-
-/* ================= HERO SLIDESHOW (ALL JPGs + SHUFFLE) ================= */
-
-const HERO_BASE =
-  "assets/1350 x 1080 - Social Posts-20260207T153633Z-3-001/1350 x 1080 - Social Posts";
-
-// Burgers: No.1.jpg → No.8.jpg
-const HERO_BURGERS = Array.from({ length: 8 }, (_, i) => `${HERO_BASE}/Burgers/No.${i + 1}.jpg`);
-
-// Sides (JPG)
-const HERO_SIDES = [
-  `${HERO_BASE}/Sides/Cheesy Jalapeno Bites.jpg`,
-  `${HERO_BASE}/Sides/Curly Fries.jpg`,
-  `${HERO_BASE}/Sides/Fries.jpg`,
-  `${HERO_BASE}/Sides/Mozzerella Sticks.jpg`,
-  `${HERO_BASE}/Sides/Onion Rings.jpg`,
-  `${HERO_BASE}/Sides/Sweet Potato Fries.jpg`,
-];
-
-// Shakes (JPG)
-const HERO_SHAKES = [
-  `${HERO_BASE}/Shakes/Malteaser.jpg`,
-  `${HERO_BASE}/Shakes/Mint Aero.jpg`,
-  `${HERO_BASE}/Shakes/Mint Aero Single.jpg`,
-  `${HERO_BASE}/Shakes/Nutella.jpg`,
-  `${HERO_BASE}/Shakes/Nutella Single.jpg`,
-  `${HERO_BASE}/Shakes/Oreo.jpg`,
-  `${HERO_BASE}/Shakes/Oreo Single.jpg`,
-];
-
-const HERO_IMAGES = [
-  ...HERO_BURGERS,
-  ...HERO_SIDES,
-  ...HERO_SHAKES,
-];
-
-function initHeroSlideshow() {
-  const track = document.getElementById("heroTrack");
-  if (!track) return;
-
-  track.innerHTML = "";
-
-  // Shuffle each refresh (Fisher–Yates)
-  const slides = HERO_IMAGES.slice();
-  for (let i = slides.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [slides[i], slides[j]] = [slides[j], slides[i]];
-  }
-
-  slides.forEach((src, i) => {
-    const img = document.createElement("img");
-    img.src = src;
-    img.alt = `Burger 8 slide ${i + 1}`;
-    img.loading = i === 0 ? "eager" : "lazy";
-    track.appendChild(img);
-  });
-
-  const imgs = track.querySelectorAll("img");
-  if (imgs.length <= 1) return;
-
-  let index = 0;
-  const count = imgs.length;
-
-  setInterval(() => {
-    index = (index + 1) % count;
-    track.style.transform = `translateX(-${index * 100}%)`;
-  }, 4000);
-}
-
-/* ===================== BRANCHES ===================== */
-const BRANCHES = [
-  { id:"hartlepool", name:"Burger 8 — Hartlepool", town:"Hartlepool", lat:54.70705484704487, lon:-1.2214848646442373, orderUrl:"https://burger8hartlepool.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Hartlepool" },
-  { id:"benton", name:"Burger 8 — Benton", town:"Benton", lat:55.007947172166844, lon:-1.5782965020026007, orderUrl:"https://burger8benton.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Benton" },
-  { id:"easington", name:"Burger 8 — Easington", town:"Easington", lat:54.78825128410204, lon:-1.3255925253066914, orderUrl:"https://burger8easington.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Easington" },
-  { id:"ashington", name:"Burger 8 — Ashington", town:"Ashington", lat:55.183361786072375, lon:-1.571623667610947, orderUrl:"https://burger8ashington.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Ashington" },
-  { id:"birtley", name:"Burger 8 — Birtley", town:"Birtley", lat:54.89415511371937, lon:-1.5768603081097352, orderUrl:"https://burger8birtley.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Birtley" },
-  { id:"blyth", name:"Burger 8 — Blyth", town:"Blyth", lat:55.126359423544635, lon:-1.510574867614533, orderUrl:"https://burger8blyth.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Blyth" },
-  { id:"bedlington", name:"Burger 8 — Bedlington", town:"Bedlington", lat:55.140780449160076, lon:-1.5668576467265456, orderUrl:"https://burger8bedlington.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Bedlington" },
-];
+/* script.js (FULL) — Menu uses JPG Social Posts instead of PNG */
 
 const MENU_PROXY_ENDPOINT = "https://burger8-menu-proxy.parsazahedi78.workers.dev/menu";
 const BACKUP_MENU_IMAGE = "assets/burger8_menu_converted.png";
@@ -96,60 +15,73 @@ const REQUIRED_CATEGORY_ORDER = [
   "Sauces",
 ];
 
-/* ===================== LOCAL PNGS (menu item images) ===================== */
-const IMAGE_BASE = "assets/PNG-20260116T144520Z-3-001/PNG";
+/* ===================== BRANCHES ===================== */
+const BRANCHES = [
+  { id:"hartlepool", name:"Burger 8 — Hartlepool", town:"Hartlepool", lat:54.70705484704487, lon:-1.2214848646442373, orderUrl:"https://burger8hartlepool.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Hartlepool" },
+  { id:"benton", name:"Burger 8 — Benton", town:"Benton", lat:55.007947172166844, lon:-1.5782965020026007, orderUrl:"https://burger8benton.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Benton" },
+  { id:"easington", name:"Burger 8 — Easington", town:"Easington", lat:54.78825128410204, lon:-1.3255925253066914, orderUrl:"https://burger8easington.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Easington" },
+  { id:"ashington", name:"Burger 8 — Ashington", town:"Ashington", lat:55.183361786072375, lon:-1.571623667610947, orderUrl:"https://burger8ashington.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Ashington" },
+  { id:"birtley", name:"Burger 8 — Birtley", town:"Birtley", lat:54.89415511371937, lon:-1.5768603081097352, orderUrl:"https://burger8birtley.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Birtley" },
+  { id:"blyth", name:"Burger 8 — Blyth", town:"Blyth", lat:55.126359423544635, lon:-1.510574867614533, orderUrl:"https://burger8blyth.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Blyth" },
+  { id:"bedlington", name:"Burger 8 — Bedlington", town:"Bedlington", lat:55.140780449160076, lon:-1.5668576467265456, orderUrl:"https://burger8bedlington.briteat.co.uk/", mapsUrl:"https://www.google.com/maps?q=Burger%208%20Bedlington" },
+];
+
+/* =========================================================
+   MENU IMAGES: Use JPG Social Posts (NOT PNG)
+========================================================= */
+const IMAGE_BASE =
+  "assets/1350 x 1080 - Social Posts-20260207T153633Z-3-001/1350 x 1080 - Social Posts";
+
 const LOCAL_IMAGE_MAP = {
   Burgers: [
-    `${IMAGE_BASE}/Burgers/No.8.png`,
-    `${IMAGE_BASE}/Burgers/No.7.png`,
-    `${IMAGE_BASE}/Burgers/No.6.png`,
-    `${IMAGE_BASE}/Burgers/No.5.png`,
-    `${IMAGE_BASE}/Burgers/No.4.png`,
-    `${IMAGE_BASE}/Burgers/No.3.png`,
-    `${IMAGE_BASE}/Burgers/No.2.png`,
-    `${IMAGE_BASE}/Burgers/No.1.png`,
+    `${IMAGE_BASE}/Burgers/No.8.jpg`,
+    `${IMAGE_BASE}/Burgers/No.7.jpg`,
+    `${IMAGE_BASE}/Burgers/No.6.jpg`,
+    `${IMAGE_BASE}/Burgers/No.5.jpg`,
+    `${IMAGE_BASE}/Burgers/No.4.jpg`,
+    `${IMAGE_BASE}/Burgers/No.3.jpg`,
+    `${IMAGE_BASE}/Burgers/No.2.jpg`,
+    `${IMAGE_BASE}/Burgers/No.1.jpg`,
   ],
+
   "Loaded Fries": [
-    `${IMAGE_BASE}/Loaded Fries/BBQ Bacon Loaded Fries.png`,
-    `${IMAGE_BASE}/Loaded Fries/Burger Loaded Fries.png`,
-    `${IMAGE_BASE}/Loaded Fries/Chicken Loaded Fries.png`,
-    `${IMAGE_BASE}/Loaded Fries/Original Loaded Fries.png`,
-    `${IMAGE_BASE}/Loaded Fries/Spicy Loaded Fries.png`,
+    `${IMAGE_BASE}/Loaded Fries/BBQ Bacon Loaded Fries.jpg`,
+    `${IMAGE_BASE}/Loaded Fries/Burger Loaded Fries.jpg`,
+    `${IMAGE_BASE}/Loaded Fries/Chicken Loaded Fries.jpg`,
+    `${IMAGE_BASE}/Loaded Fries/Original Loaded Fries.jpg`,
+    `${IMAGE_BASE}/Loaded Fries/Spicy Loaded Fries.jpg`,
   ],
+
   Sauces: [
-    `${IMAGE_BASE}/Sauces/BBQ Sauce.png`,
-    `${IMAGE_BASE}/Sauces/Buffalo Sauce.png`,
-    `${IMAGE_BASE}/Sauces/Chipotle Sauce.png`,
-    `${IMAGE_BASE}/Sauces/Garlic Mayo.png`,
-    `${IMAGE_BASE}/Sauces/Ketchup.png`,
-    `${IMAGE_BASE}/Sauces/Mayo.png`,
-    `${IMAGE_BASE}/Sauces/Sriracha Sauce.png`,
-    `${IMAGE_BASE}/Sauces/Sweet Chilli.png`,
+    `${IMAGE_BASE}/Sauces/BBQ Sauce.jpg`,
+    `${IMAGE_BASE}/Sauces/Buffalo Sauce.jpg`,
+    `${IMAGE_BASE}/Sauces/Chipotle Sauce.jpg`,
+    `${IMAGE_BASE}/Sauces/Garlic Sauce.jpg`,
+    `${IMAGE_BASE}/Sauces/Ketchup.jpg`,
+    `${IMAGE_BASE}/Sauces/Mayo.jpg`,
+    `${IMAGE_BASE}/Sauces/Mixed Sauces.jpg`,
+    `${IMAGE_BASE}/Sauces/Sriracha Sauce.jpg`,
+    `${IMAGE_BASE}/Sauces/Sweet Chilli.jpg`,
   ],
+
   Shakes: [
-    `${IMAGE_BASE}/Shakes/Biscoff.png`,
-    `${IMAGE_BASE}/Shakes/Bubblegum.png`,
-    `${IMAGE_BASE}/Shakes/Caramel.png`,
-    `${IMAGE_BASE}/Shakes/DSC08103-Edit.png`,
-    `${IMAGE_BASE}/Shakes/Kinder Bueno.png`,
-    `${IMAGE_BASE}/Shakes/Malteaser.png`,
-    `${IMAGE_BASE}/Shakes/Nutella.png`,
-    `${IMAGE_BASE}/Shakes/Oreo.png`,
+    `${IMAGE_BASE}/Shakes/Biscoff.jpg`,
+    `${IMAGE_BASE}/Shakes/Bubblegum.jpg`,
+    `${IMAGE_BASE}/Shakes/Caramel.jpg`,
+    `${IMAGE_BASE}/Shakes/Kinder Bueno.jpg`,
+    `${IMAGE_BASE}/Shakes/Malteaser.jpg`,
+    `${IMAGE_BASE}/Shakes/Mint Aero.jpg`,
+    `${IMAGE_BASE}/Shakes/Nutella.jpg`,
+    `${IMAGE_BASE}/Shakes/Oreo.jpg`,
   ],
+
   Sides: [
-    `${IMAGE_BASE}/Sides/Fries.png`,
-    `${IMAGE_BASE}/Sides/Jalapeno Cheese Bites.png`,
-    `${IMAGE_BASE}/Sides/Mozzerella Sticks.png`,
-    `${IMAGE_BASE}/Sides/Onion Rings.png`,
-    `${IMAGE_BASE}/Sides/Sweet Potato Fries.png`,
-  ],
-  Wings: [
-    `${IMAGE_BASE}/Wings/BBQ Wings.png`,
-    `${IMAGE_BASE}/Wings/Buffalo Wings.png`,
-    `${IMAGE_BASE}/Wings/Chipotle Wings.png`,
-    `${IMAGE_BASE}/Wings/Salt & Pepper Wings.png`,
-    `${IMAGE_BASE}/Wings/Sriracha Wings.png`,
-    `${IMAGE_BASE}/Wings/Sweet Chilli Wings.png`,
+    `${IMAGE_BASE}/Sides/Cheesy Jalapeno Bites.jpg`,
+    `${IMAGE_BASE}/Sides/Curly Fries.jpg`,
+    `${IMAGE_BASE}/Sides/Fries.jpg`,
+    `${IMAGE_BASE}/Sides/Mozzerella Sticks.jpg`,
+    `${IMAGE_BASE}/Sides/Onion Rings.jpg`,
+    `${IMAGE_BASE}/Sides/Sweet Potato Fries.jpg`,
   ],
 };
 
@@ -311,6 +243,49 @@ function resolveLocalImage(categoryRaw, itemNameRaw) {
   return null;
 }
 
+/* =========================================================
+   HERO SLIDESHOW: shuffle all JPGs (burger + sides + shakes + loaded fries + sauces)
+========================================================= */
+const HERO_IMAGES = [
+  ...LOCAL_IMAGE_MAP.Burgers,
+  ...(LOCAL_IMAGE_MAP.Sides || []),
+  
+  ...(LOCAL_IMAGE_MAP["Loaded Fries"] || []),
+  
+];
+
+function initHeroSlideshow() {
+  const track = document.getElementById("heroTrack");
+  if (!track) return;
+
+  track.innerHTML = "";
+
+  const slides = HERO_IMAGES.slice();
+  for (let i = slides.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [slides[i], slides[j]] = [slides[j], slides[i]];
+  }
+
+  slides.forEach((src, i) => {
+    const img = document.createElement("img");
+    img.src = src;
+    img.alt = `Burger 8 slide ${i + 1}`;
+    img.loading = i === 0 ? "eager" : "lazy";
+    track.appendChild(img);
+  });
+
+  const imgs = track.querySelectorAll("img");
+  if (imgs.length <= 1) return;
+
+  let index = 0;
+  const count = imgs.length;
+
+  setInterval(() => {
+    index = (index + 1) % count;
+    track.style.transform = `translateX(-${index * 100}%)`;
+  }, 4000);
+}
+
 /* ===================== DOM ===================== */
 const yearEl = document.getElementById("year");
 const branchSelect = document.getElementById("branchSelect");
@@ -322,15 +297,6 @@ const menuSections = document.getElementById("menuSections");
 const backupMenu = document.getElementById("backupMenu");
 
 const orderNowBtn = document.getElementById("orderNowBtn");
-
-// Modal DOM
-const upsellBackdrop = document.getElementById("upsellBackdrop");
-const upsellModal = document.getElementById("upsellModal");
-const upsellClose = document.getElementById("upsellClose");
-const upsellSkip = document.getElementById("upsellSkip");
-const upsellGoOrder = document.getElementById("upsellGoOrder");
-const upsellOptionsRoot = document.getElementById("upsellOptions");
-const upsellForItem = document.getElementById("upsellForItem");
 
 if (yearEl) yearEl.textContent = new Date().getFullYear();
 
@@ -388,7 +354,6 @@ function initBranchMap() {
   const mapEl = document.getElementById("branchMap");
   if (!mapEl) return;
 
-  // If Leaflet didn't load, don't crash the page.
   if (typeof L === "undefined") {
     console.warn("Leaflet not loaded. Map will not render.");
     mapEl.innerHTML = `<div style="padding:16px;font-weight:900;color:#444;">Map failed to load.</div>`;
@@ -527,18 +492,6 @@ function ensureDescription(item) {
   return d ? item : { ...item, description: "See in-store menu for full details." };
 }
 
-function enforceBurgerFries(item) {
-  if (item.category !== "Burgers") return item;
-  const add = "Served with Skin-on Fries.";
-  const d = String(item.description || "").trim();
-  const has = d.toLowerCase().includes("skin-on fries");
-  return {
-    ...item,
-    description: has ? d : (d ? `${d} • ${add}` : add),
-    _badge: "Served with Skin-on Fries",
-  };
-}
-
 function burgerSortKey(name) {
   const n = burgerNumberFromName(name);
   if (Number.isFinite(n)) return n;
@@ -557,9 +510,13 @@ function orderedCategoriesPresent(items) {
   return REQUIRED_CATEGORY_ORDER.filter(c => present.has(c));
 }
 
+/* Wings split only if you add LOCAL_IMAGE_MAP.Wings (JPGs) */
 function splitWings(items) {
+  const wingsList = LOCAL_IMAGE_MAP.Wings || null;
+  if (!wingsList || !wingsList.length) return items;
+
   const out = [];
-  const flavourNames = (LOCAL_IMAGE_MAP.Wings || []).map(fileBase);
+  const flavourNames = wingsList.map(fileBase);
 
   for (const it of items) {
     if (it.category !== "Wings") { out.push(it); continue; }
@@ -600,6 +557,9 @@ function renderCategoryBar(activeCat, cats) {
     btn.addEventListener("click", () => scrollToSection(cat));
     catBar.appendChild(btn);
   });
+
+  // keep arrows state reasonably accurate
+  requestAnimationFrame(updateCatArrowState);
 }
 
 function splitToLines(item) {
@@ -627,12 +587,10 @@ function renderMenuSections(items) {
     head.textContent = cat.toUpperCase();
     section.appendChild(head);
 
-    if (cat === "Burgers") {
-      const note = document.createElement("div");
-      note.className = "menuSection__note";
-      note.textContent = "All burgers are served with Skin-on Fries.";
-      section.appendChild(note);
-    }
+    // No extra notes (client asked: items + description only)
+
+    const grid = document.createElement("div");
+    grid.className = "menuGrid";
 
     const catItems = items
       .filter(x => x.category === cat)
@@ -658,8 +616,6 @@ function renderMenuSections(items) {
         : `<div class="menuItem__img" aria-hidden="true"></div>`;
 
       const lines = splitToLines(item).slice(0, 14).map(l => `<div class="line">${escapeHtml(l)}</div>`).join("");
-      const badge = item._badge ? `<div class="badgeRow"><span class="badge">${escapeHtml(item._badge)}</span></div>` : "";
-
       row.innerHTML = `
         <div class="menuItem__left">${img}</div>
         <div class="menuItem__right">
@@ -668,13 +624,13 @@ function renderMenuSections(items) {
             <div class="menuItem__price">${moneyGBP(item.price)}</div>
           </div>
           <div class="menuItem__lines">${lines}</div>
-          ${badge}
         </div>
       `;
 
-      row.addEventListener("click", () => openUpsell(item));
-      section.appendChild(row);
+      grid.appendChild(row);
     });
+
+    section.appendChild(grid);
 
     menuSections.appendChild(section);
   });
@@ -730,83 +686,78 @@ function showBackupMenuImage() {
   `;
 }
 
-/* ===================== Upsell modal ===================== */
-const UPSELL_OPTIONS = [
-  { id: "fries", name: "Extra Skin-on Fries", desc: "Crispy upgrade." },
-  { id: "drink", name: "Add a Drink", desc: "Perfect pairing." },
-  { id: "sauce", name: "Add a Sauce", desc: "Pick a dip." },
-];
+/* ===================== Slidable category rail ===================== */
+const catPrev = document.getElementById("catPrev");
+const catNext = document.getElementById("catNext");
 
-let upsellSelected = new Set();
-let lastClickedItem = null;
+function updateCatArrowState() {
+  if (!catBar) return;
+  const max = catBar.scrollWidth - catBar.clientWidth;
+  const left = catBar.scrollLeft;
+  const hasOverflow = max > 2;
 
-function closeUpsellHard() {
-  document.getElementById("upsellBackdrop")?.setAttribute("hidden", "");
-  document.getElementById("upsellModal")?.setAttribute("hidden", "");
-  upsellSelected = new Set();
-  lastClickedItem = null;
+  if (catPrev) catPrev.style.visibility = hasOverflow ? "visible" : "hidden";
+  if (catNext) catNext.style.visibility = hasOverflow ? "visible" : "hidden";
+
+  if (catPrev) catPrev.disabled = left <= 2;
+  if (catNext) catNext.disabled = left >= max - 2;
 }
-window.closeUpsellHard = closeUpsellHard;
 
-function openUpsell(item) {
-  lastClickedItem = item;
-  upsellSelected = new Set();
+function initCategoryRail() {
+  if (!catBar) return;
 
-  if (!upsellOptionsRoot || !upsellForItem || !upsellBackdrop || !upsellModal) return;
+  // Arrow buttons
+  catPrev?.addEventListener("click", () => catBar.scrollBy({ left: -260, behavior: "smooth" }));
+  catNext?.addEventListener("click", () => catBar.scrollBy({ left:  260, behavior: "smooth" }));
 
-  upsellForItem.textContent = `For: ${item.name}`;
-  upsellOptionsRoot.innerHTML = "";
+  // Drag-to-scroll (desktop)
+  let isDown = false;
+  let startX = 0;
+  let startScrollLeft = 0;
 
-  UPSELL_OPTIONS.forEach((opt) => {
-    const div = document.createElement("div");
-    div.className = "upsellOpt";
-    div.dataset.id = opt.id;
-    div.innerHTML = `
-      <div class="upsellOpt__name">${escapeHtml(opt.name)}</div>
-      <div class="upsellOpt__desc">${escapeHtml(opt.desc)}</div>
-    `;
-    div.addEventListener("click", () => {
-      const id = div.dataset.id;
-      if (upsellSelected.has(id)) {
-        upsellSelected.delete(id);
-        div.classList.remove("is-selected");
-      } else {
-        upsellSelected.add(id);
-        div.classList.add("is-selected");
-      }
-    });
-    upsellOptionsRoot.appendChild(div);
+  catBar.addEventListener("pointerdown", (e) => {
+    isDown = true;
+    startX = e.clientX;
+    startScrollLeft = catBar.scrollLeft;
+    catBar.classList.add("is-dragging");
+    catBar.setPointerCapture?.(e.pointerId);
+  });
+  catBar.addEventListener("pointerup", () => {
+    isDown = false;
+    catBar.classList.remove("is-dragging");
+  });
+  catBar.addEventListener("pointercancel", () => {
+    isDown = false;
+    catBar.classList.remove("is-dragging");
+  });
+  catBar.addEventListener("pointermove", (e) => {
+    if (!isDown) return;
+    const dx = e.clientX - startX;
+    catBar.scrollLeft = startScrollLeft - dx;
   });
 
-  upsellBackdrop.removeAttribute("hidden");
-  upsellModal.removeAttribute("hidden");
+  // Wheel-to-horizontal (trackpads/mouse)
+  catBar.addEventListener(
+    "wheel",
+    (e) => {
+      // If user is already doing horizontal, let it pass
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      catBar.scrollLeft += e.deltaY;
+      e.preventDefault();
+    },
+    { passive: false }
+  );
+
+  catBar.addEventListener("scroll", updateCatArrowState, { passive: true });
+  window.addEventListener("resize", updateCatArrowState);
+
+  updateCatArrowState();
 }
-
-upsellClose?.addEventListener("click", closeUpsellHard);
-upsellSkip?.addEventListener("click", closeUpsellHard);
-
-upsellBackdrop?.addEventListener("click", (e) => {
-  if (e.target === upsellBackdrop) closeUpsellHard();
-});
-
-upsellGoOrder?.addEventListener("click", () => {
-  closeUpsellHard();
-  const branch = BRANCHES.find((b) => b.id === selectedBranchId) || null;
-  if (!branch) {
-    document.getElementById("locations")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    return;
-  }
-  goToBranch(branch);
-});
-
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeUpsellHard();
-});
 
 /* ===================== INIT ===================== */
 (async function init() {
   initHeroSlideshow();
-
+  initCategoryRail();
   renderSelectOptions();
   setSelectedBranch(""); // disables Order Now until branch chosen
   initBranchMap();
@@ -814,7 +765,7 @@ document.addEventListener("keydown", (e) => {
   try {
     await loadMenuFromProxy();
 
-    let items = MENU.map(ensureDescription).map(enforceBurgerFries);
+    let items = MENU.map(ensureDescription);
     items = onlyRequiredCategories(items);
     items = splitWings(items);
 

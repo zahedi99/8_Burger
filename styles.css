@@ -1,174 +1,226 @@
+/* styles.css (FULL) — with slideshow zoomed-out (contain) + red background */
+
 :root{
-  --bg:#ffffff;
-  --card:#ffffff;
+  --bg: #ffffff;
+  --ink: #101214;
+  --muted: rgba(0,0,0,.58);
   --line: rgba(0,0,0,.10);
-  --text:#0e0f12;
-  --muted: rgba(0,0,0,.55);
-  --red:#d1162c;
-  --shadow: 0 16px 40px rgba(0,0,0,.10);
+  --red: #d1162c;
+
   --radius: 18px;
 
-  /* menu sizing */
-  --menuImgW: 150px;
-  --menuImgH: 130px;
-  --menuTitle: 15px;
-  --menuDesc: 12px;
-  --menuPad: 16px;
+  /* Menu card sizing (bigger on browser) */
+  --menuImgW: 180px;
+  --menuImgH: 150px;
+  --menuTitle: 18px;
+  --menuDesc: 14px;
+  --menuPad: 18px;
 }
-
-/* guarantee hidden hides */
-[hidden]{ display:none !important; }
 
 @media (min-width: 980px){
   :root{
-    --menuImgW: 200px;
-    --menuImgH: 160px;
-    --menuTitle: 18px;
-    --menuDesc: 13px;
-    --menuPad: 18px;
-  }
-}
-@media (min-width: 1200px){
-  :root{
-    --menuImgW: 240px;
-    --menuImgH: 190px;
+    --menuImgW: 210px;
+    --menuImgH: 170px;
     --menuTitle: 20px;
-    --menuDesc: 14px;
+    --menuDesc: 15px;
     --menuPad: 20px;
   }
 }
 
 *{ box-sizing:border-box; }
-html,body{ margin:0; padding:0; }
-
+html{ scroll-behavior:smooth; }
 body{
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-  color: var(--text);
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   background: var(--bg);
+  color: var(--ink);
 }
 
-/* ================= TOP BAR ================= */
+a{ color: inherit; text-decoration:none; }
+
+/* ================= TOPBAR ================= */
 .topbar{
   position: sticky;
-  top: 0;
-  z-index: 60;
-  background: rgba(255,255,255,.95);
+  top:0;
+  z-index: 90;
+  background: rgba(255,255,255,.92);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid rgba(0,0,0,.08);
 }
 
 .topbar__inner{
-  max-width: 1200px;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 12px 16px;
+  padding: 14px 18px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:16px;
+  gap: 12px;
 }
 
-.brand{ display:flex; align-items:center; gap:12px; }
-.brand__logo{ width:44px; height:44px; object-fit:contain; }
-.brand__name{ font-weight:900; letter-spacing:.08em; }
-.brand__tag{ font-size:12px; color:var(--muted); font-weight:700; }
-
-.topbar__nav{ display:flex; gap:10px; }
-
-.navLink{
-  text-decoration:none;
-  color:var(--text);
-  font-weight:900;
-  font-size:12px;
-  padding:10px 14px;
-  border-radius:14px;
-  border:1px solid var(--line);
-  background:#fff;
+.brand{
+  display:flex;
+  align-items:center;
+  gap: 12px;
 }
 
-/* ================= HERO SLIDESHOW — OPTION B (contain) ================= */
-.heroSlideshow{
-  padding: 16px 16px 0;
-}
-
-.heroSlideshow__wrap{
-  max-width: 1200px;
-  margin: 0 auto;
-  border-radius: 22px;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  background: var(--red);
-}
-
-.heroSlideshow__track{
-  display: flex;
-  width: 100%;
-  height: min(38vh, 420px);
-  transition: transform 0.6s ease-in-out;
-}
-
-.heroSlideshow__track img{
-  width: 100%;
-  height: 100%;
-  flex-shrink: 0;
+.brand__logo{
+  width: 38px;
+  height: 38px;
   object-fit: contain;
-  object-position: center;
-  display: block;
-  background: var(--red);
 }
 
-@media (max-width: 980px){
-  .heroSlideshow__track{ height: 320px; }
-}
-@media (max-width: 560px){
-  .heroSlideshow__track{ height: 240px; }
+.brand__name{
+  font-weight: 1000;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }
 
-/* ================= SECTIONS ================= */
-.section{
-  max-width: 1200px;
+.brand__tag{
+  margin-top: 2px;
+  font-size: 12px;
+  color: rgba(0,0,0,.55);
+  font-weight: 800;
+}
+
+.nav{ display:flex; gap: 10px; }
+
+.nav__btn{
+  border: 1px solid rgba(0,0,0,.12);
+  background: #fff;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 1000;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+/* ================= LAYOUT ================= */
+.main{
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 26px 16px;
+  padding: 16px 18px 120px;
 }
+
+.section{ margin-top: 18px; }
 
 .section__head{
   display:flex;
+  align-items:flex-end;
   justify-content:space-between;
-  align-items:baseline;
-  gap:14px;
-  flex-wrap:wrap;
+  gap: 14px;
 }
 
 .section__title{
-  margin:0;
-  font-size:28px;
-  font-weight:1000;
+  font-size: 32px;
+  margin: 0;
+  font-weight: 1000;
 }
 
 .section__sub{
-  margin:0;
-  color:var(--muted);
-  font-weight:700;
+  margin: 0;
+  color: rgba(0,0,0,.55);
+  font-weight: 800;
 }
 
 .status{
-  color:var(--muted);
-  font-weight:800;
+  color: rgba(0,0,0,.55);
+  font-weight: 900;
 }
 
-/* ================= CATEGORY BAR ================= */
-.catBar{
+/* ================= HERO ================= */
+.hero{
+  margin-top: 10px;
+}
+
+.hero__frame{
+  width: 100%;
+  height: 300px;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,.10);
+  box-shadow: 0 18px 50px rgba(0,0,0,.12);
+
+  /*  show "zoomed-out" slides nicely */
+  background: var(--red);
+}
+
+@media (min-width: 860px){
+  .hero__frame{ height: 340px; }
+}
+
+.hero__track{
+  height:100%;
+  display:flex;
+  transition: transform 650ms ease;
+}
+
+.hero__track img{
+  width:100%;
+  height:100%;
+  flex: 0 0 100%;
+
+  /*  zoom out (no crop) */
+  object-fit: contain;
+  object-position: center;
+
+  /*  keep consistent red behind each slide */
+  background: var(--red);
+
+  /* optional extra zoom-out */
+  transform: scale(0.95);
+}
+
+/* ================= CATEGORY BAR (SLIDABLE) ================= */
+.catRail{
   position: sticky;
   top: 68px;
-  z-index: 40;
+  z-index: 50;
+  margin-top:10px;
+  padding: 10px 0;
   background: rgba(255,255,255,.96);
   backdrop-filter: blur(10px);
+  border-bottom:1px solid rgba(0,0,0,.08);
+  display:flex;
+  align-items:center;
+  gap: 8px;
+}
+
+.catArrow{
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background:#fff;
+  cursor:pointer;
+  font-weight: 1000;
+  font-size: 18px;
+  line-height: 1;
+  display:grid;
+  place-items:center;
+  user-select:none;
+}
+
+.catArrow:disabled{
+  opacity: .35;
+  cursor: default;
+}
+
+.catBar{
+  flex:1;
   display:flex;
   gap:10px;
   overflow:auto;
-  padding:14px 10px;
-  border-bottom:1px solid rgba(0,0,0,.08);
-  margin-top:10px;
+  padding: 4px 10px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.catBar::-webkit-scrollbar{ display:none; }
+
+.catBar.is-dragging{ cursor: grabbing; }
+.catBar{ cursor: grab; }
 
 .catBtn{
   border:1px solid var(--line);
@@ -180,6 +232,7 @@ body{
   font-size:11px;
   letter-spacing:.06em;
   text-transform:uppercase;
+  scroll-snap-align: start;
 }
 
 .catBtn.is-active{
@@ -198,8 +251,8 @@ body{
 
 .menuSection__head{
   font-weight:1000;
-  font-size:12px;
-  letter-spacing:.08em;
+  letter-spacing:.10em;
+  font-size: 12px;
   text-transform:uppercase;
   color:rgba(0,0,0,.65);
 }
@@ -209,6 +262,21 @@ body{
   color:rgba(0,0,0,.55);
   font-weight:800;
   font-size:12px;
+}
+
+/* Wix-like boxed layout */
+.menuGrid{
+  margin-top: 14px;
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 860px){
+  .menuGrid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
 }
 
 /* ================= MENU ITEM ================= */
@@ -221,9 +289,12 @@ body{
   border-radius:18px;
   background:#fff;
   box-shadow:0 10px 24px rgba(0,0,0,.06);
-  margin-bottom:14px;
   align-items:center;
-  cursor:pointer;
+  cursor:default;
+}
+
+.menuItem:hover{
+  box-shadow:0 14px 34px rgba(0,0,0,.08);
 }
 
 .menuItem__img{
@@ -262,223 +333,107 @@ body{
   font-weight:750;
 }
 
-.badgeRow{ margin-top:10px; }
+.menuItem__lines .line{ margin-top: 3px; }
 
-.badge{
-  border:1px solid rgba(209,22,44,.25);
-  background:rgba(209,22,44,.08);
-  border-radius:999px;
-  padding:6px 10px;
-  font-size:10px;
-  font-weight:1000;
-  text-transform:uppercase;
-}
-
-/* ================= LOCATIONS (dropdown + map only) ================= */
+/* ================= LOCATIONS ================= */
 .controlsRow{
+  margin-top: 12px;
   display:flex;
-  gap:14px;
-  align-items:flex-end;
   flex-wrap:wrap;
-  margin-top:14px;
+  gap: 12px;
+  align-items:flex-end;
 }
 
 .label{
   display:flex;
   flex-direction:column;
-  gap:6px;
-  font-weight:900;
-  font-size:12px;
-  color:rgba(0,0,0,.75);
+  gap: 6px;
+  font-weight: 1000;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: rgba(0,0,0,.65);
 }
 
 .select{
-  min-width: 280px;
-  padding:12px 12px;
-  border-radius:14px;
-  border:1px solid rgba(0,0,0,.14);
+  width: min(520px, 100%);
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.14);
+  font-weight: 800;
   background:#fff;
-  font-weight:800;
 }
 
 .hint{
-  color:rgba(0,0,0,.55);
-  font-weight:800;
-  padding-bottom:6px;
+  color: rgba(0,0,0,.55);
+  font-weight: 900;
+  padding-bottom: 10px;
 }
 
-/* MAP — REQUIRED HEIGHT so Leaflet actually renders */
 .mapCard{
-  margin-top:14px;
-  border-radius: 18px;
+  margin-top: 14px;
   border: 1px solid rgba(0,0,0,.10);
+  border-radius: 18px;
   overflow: hidden;
-  background:#f3f4f6;
+  background:#fff;
+  box-shadow: 0 16px 44px rgba(0,0,0,.10);
 }
 
 .map{
-  width: 100%;
-  height: 420px; /* IMPORTANT */
+  width:100%;
+  height: 360px;
 }
 
-@media (max-width: 560px){
-  .map{ height: 320px; }
-  .menuItem{ grid-template-columns:120px 1fr; }
-}
-
-/* ================= ORDER NOW BUTTON ================= */
+/* ================= ORDER NOW (fixed) ================= */
 .orderNowBtn{
-  position:fixed;
-  right:18px;
-  bottom:18px;
-  z-index:120;
-  border:none;
-  border-radius:999px;
-  padding:16px 22px;
-  background:var(--red);
-  color:#fff;
-  font-weight:1000;
-  font-size:12px;
-  letter-spacing:.06em;
-  box-shadow:0 18px 40px rgba(0,0,0,.22);
-  cursor:pointer;
-}
-
-.orderNowBtn:disabled{
-  opacity:.5;
-  cursor:not-allowed;
-}
-
-/* ================= MODAL (UPSELL) ================= */
-.modalBackdrop{
   position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.35);
-  z-index: 200;
-}
+  right: 18px;
+  bottom: 18px;
+  z-index: 120;
 
-.modal{
-  position: fixed;
-  inset: 0;
-  display:flex;
-  align-items:flex-start;
-  justify-content:center;
-  padding: 90px 16px 16px;
-  z-index: 210;
-}
+  border: none;
+  background: #f2a3ad;   /* soft faded red when disabled */
+  color: #fff;
 
-.modalCard{
-  width: min(920px, 100%);
-  background:#fff;
-  border-radius: 22px;
-  box-shadow: 0 30px 80px rgba(0,0,0,.25);
-  border: 1px solid rgba(0,0,0,.08);
-  padding: 18px 18px 16px;
-}
+  padding: 16px 22px;
+  border-radius: 999px;
 
-.modalTop{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-}
-
-.modalTitle{
-  margin:0;
-  font-size: 22px;
   font-weight: 1000;
-}
-
-.iconBtn{
-  border: 1px solid rgba(0,0,0,.14);
-  background: #fff;
-  border-radius: 12px;
-  padding: 10px 12px;
-  cursor: pointer;
-  font-weight: 1000;
-}
-
-.modalSub{
-  margin-top: 8px;
-  color: rgba(0,0,0,.55);
-  font-weight: 900;
-}
-
-.upsellGrid{
-  margin-top: 14px;
-  display:grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.upsellOpt{
-  border: 1px solid rgba(0,0,0,.10);
-  border-radius: 16px;
-  padding: 14px;
-  cursor:pointer;
-  background:#fff;
-}
-
-.upsellOpt.is-selected{
-  border-color: var(--red);
-  box-shadow: 0 0 0 3px rgba(209,22,44,.12);
-}
-
-.upsellOpt__name{
-  font-weight: 1000;
+  letter-spacing: .08em;
   text-transform: uppercase;
-  letter-spacing: .06em;
-  font-size: 12px;
+
+  cursor: pointer;
+
+  box-shadow: 0 12px 30px rgba(0,0,0,.15);
+  transition: background .25s ease, transform .15s ease, box-shadow .25s ease;
 }
 
-.upsellOpt__desc{
-  margin-top: 6px;
-  color: rgba(0,0,0,.55);
-  font-weight: 800;
-  font-size: 12px;
+/* 🔴 Disabled */
+.orderNowBtn:disabled{
+  background: #f2a3ad;
+  opacity: .75;
+  cursor: not-allowed;
+  box-shadow: 0 8px 20px rgba(0,0,0,.12);
 }
 
-.modalActions{
-  margin-top: 16px;
-  display:flex;
-  justify-content:flex-end;
-  gap: 10px;
+/* 🔥 Enabled */
+.orderNowBtn:not(:disabled){
+  background: #d1162c; /* FULL RED */
+  box-shadow: 0 20px 50px rgba(209,22,44,.45);
 }
 
-.ghostBtn{
-  border:1px solid rgba(0,0,0,.14);
-  background:#fff;
-  border-radius: 999px;
-  padding: 12px 16px;
-  font-weight: 1000;
-  letter-spacing:.06em;
-  text-transform:uppercase;
-  font-size: 11px;
-  cursor:pointer;
+/* Hover effect when active */
+.orderNowBtn:not(:disabled):hover{
+  background: #b81225;
+  transform: translateY(-2px);
 }
 
-.primaryBtn{
-  border:none;
-  background: var(--red);
-  color:#fff;
-  border-radius: 999px;
-  padding: 12px 16px;
-  font-weight: 1000;
-  letter-spacing:.06em;
-  text-transform:uppercase;
-  font-size: 11px;
-  cursor:pointer;
-}
-
-@media (max-width: 760px){
-  .upsellGrid{ grid-template-columns: 1fr; }
-}
 
 /* ================= FOOTER ================= */
 .footer{
   border-top:1px solid rgba(0,0,0,.10);
   padding:18px;
   text-align:center;
-  color:var(--muted);
-  font-weight:800;
+  color: rgba(0,0,0,.55);
+  font-weight: 900;
 }
